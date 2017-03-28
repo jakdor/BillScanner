@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">BillScanner</string>
+
+    <string name="scan_button_text">Skanuj</string>
+
+    <string name="title_activity_ocrcapture">OCRCapture</string>
+    <string name="title_activity_bill_acceptance">Sprawdź zeskanowany rachunek</string>
+</resources>
