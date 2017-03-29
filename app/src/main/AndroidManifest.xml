@@ -20,7 +20,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_ocrcapture"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/FullscreenTheme">
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.asi.billscanner.MainActivity" />

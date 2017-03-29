@@ -22,9 +22,11 @@ class BillFactory {
     }
 
     void createNewBill(){
-        lunchOCRCapture();
+        if(lunchOnce) {
+            lunchOCRCapture();
 
-        //tutaj reszta procesu dodawania Bill'a
+            //tutaj reszta procesu dodawania Bill'a
+        }
     }
 
     private static boolean lunchOnce = true;
@@ -33,18 +35,14 @@ class BillFactory {
     }
 
     private void lunchOCRCapture(){
-        if(lunchOnce) {
-            Intent OCRCaptureIntent = new Intent(appContext, OCRCaptureActivity.class);
-            appContext.startActivity(OCRCaptureIntent);
-            lunchOnce = false;
-        }
+        Intent OCRCaptureIntent = new Intent(appContext, OCRCaptureActivity.class);
+        appContext.startActivity(OCRCaptureIntent);
+        lunchOnce = false;
     }
 
     private void lunchBillAcceptanceActivity(){
-        if(lunchOnce) {
-            Intent billAcceptanceIntent = new Intent(appContext, BillAcceptanceActivity.class);
-            appContext.startActivity(billAcceptanceIntent);
-            lunchOnce = false;
-        }
+        Intent billAcceptanceIntent = new Intent(appContext, BillAcceptanceActivity.class);
+        appContext.startActivity(billAcceptanceIntent);
+        lunchOnce = false;
     }
 }
