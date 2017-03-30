@@ -19,9 +19,11 @@ public class MainActivity extends AppCompatActivity {
     private final View.OnTouchListener scanButtonListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
-            dummyTextView.setText("click!");
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                dummyTextView.setText("click!");
 
-            billFactory.createNewBill();
+                billFactory.createNewBill();
+            }
             return false;
         }
     };
