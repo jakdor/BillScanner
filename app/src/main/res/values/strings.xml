@@ -6,17 +6,16 @@
     <string name="title_activity_ocrcapture">OCRCapture</string>
     <string name="title_activity_bill_acceptance">Sprawdź zeskanowany rachunek</string>
 
-    <string name="ocr_snackbar">Szukanie tekstu... zrób zdjęcie po wykryciu</string>
+    <string name="ocr_snackbar">Szukanie tekstu&#8230; zrób zdjęcie po wykryciu</string>
+    <string name="ocr_no_detection_toast">Nic nie widzę, spróbuj ponownie</string>
 
     <string name="ok">OK</string>
-    <string name="permission_camera_rationale">Access to the camera is needed for detection</string>
-    <string name="no_camera_permission">This application cannot run because it does not have the camera permission.  The application will now exit.</string>
-    <string name="low_storage_error">Ocr dependencies cannot be downloaded due to low device storage</string>
-    <string name="ocr_header">Click &quot;Detect Text&quot; to detect text</string>
-    <string name="read_text">Detect Text</string>
+    <string name="permission_camera_rationale">Potrzebny dostęp do kamery</string>
+    <string name="no_camera_permission">Aplikacja nie może działać poprawnie bez dostępu do kamery! Nastąpi zamknięcie</string>
+    <string name="low_storage_error">Aplikacja potrzebuje więcej wolnego miejsca na dysku!</string>
+    <string name="read_text">Wykryj tekst</string>
     <string name="auto_focus">Auto Focus</string>
-    <string name="use_flash">Use Flash</string>
-    <string name="ocr_success">Text read successfully</string>
-    <string name="ocr_failure">No text captured</string>
-    <string name="ocr_error">"Error reading text: %1$s"</string>
+    <string name="use_flash">Włącz latarkę</string>
+    <string name="ocr_success">Odczytano tekst</string>
+    <string name="ocr_failure">Nie wykryto textu</string>
 </resources>

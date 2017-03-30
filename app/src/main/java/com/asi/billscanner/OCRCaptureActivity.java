@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -19,9 +20,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -57,16 +62,70 @@ public final class OCRCaptureActivity extends AppCompatActivity {
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
+    private OCRProcessor ocrProcessor;
+
+    /**
+     * floatingActionTakePhoto listener
+     */
     private final View.OnTouchListener takePhotoButtonListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                Log.wtf("OCRCaptureActivity", "CLICK!");
-
+                Log.i("OCRCaptureActivity", "CLICK!");
+                ocrEnd();
             }
             return false;
         }
     };
+
+    /**
+     * lunches after user decided to take snapshot, checks if ocr was successful
+     */
+    private void ocrEnd(){
+        String ocrStr = ocrProcessor.ocrResult();
+        if(ocrStr == null){
+            Toast toast = Toast.makeText(this, R.string.ocr_no_detection_toast, Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER_HORIZONTAL| Gravity.CENTER, 0, 450);
+            toast.show();
+        }
+        else{
+            frameFlash.startAnimation(fade);
+            Log.i("OCRCaptureActivity", "SnapShot: " + ocrStr);
+        }
+    }
+
+    private FrameLayout frameFlash;
+    private AlphaAnimation fade;
+
+    /**
+     * snapshot effect (just for fun)
+     */
+    private void flashAnimationSetup(){
+
+        frameFlash = (FrameLayout) findViewById(R.id.pnlFlash);
+
+        fade = new AlphaAnimation(1, 0);
+        fade.setDuration(50);
+        fade.setAnimationListener(new Animation.AnimationListener() {
+
+            MediaActionSound sound = new MediaActionSound();
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+                frameFlash.setVisibility(View.VISIBLE);
+                sound.play(MediaActionSound.SHUTTER_CLICK);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation anim) {
+                frameFlash.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+    }
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -101,6 +160,8 @@ public final class OCRCaptureActivity extends AppCompatActivity {
 
         FloatingActionButton fab1 = (FloatingActionButton) findViewById(R.id.floatingActionTakePhoto);
         fab1.setOnTouchListener(takePhotoButtonListener);
+
+        flashAnimationSetup();
     }
 
     /**
@@ -133,14 +194,6 @@ public final class OCRCaptureActivity extends AppCompatActivity {
                 .show();
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent e) {
-        boolean b = scaleGestureDetector.onTouchEvent(e);
-        boolean c = gestureDetector.onTouchEvent(e);
-
-        return b || c || super.onTouchEvent(e);
-    }
-
     /**
      * Creates and starts the camera
      */
@@ -148,7 +201,7 @@ public final class OCRCaptureActivity extends AppCompatActivity {
     private void createCameraSource(boolean autoFocus, boolean useFlash) {
         Context context = getApplicationContext();
 
-        OCRProcessor ocrProcessor = new OCRProcessor(mGraphicOverlay);
+        ocrProcessor = new OCRProcessor(mGraphicOverlay);
 
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
         textRecognizer.setProcessor(ocrProcessor);
@@ -156,8 +209,8 @@ public final class OCRCaptureActivity extends AppCompatActivity {
         if (!textRecognizer.isOperational()) {
             Log.w(TAG, "Detector dependencies are not yet available.");
 
-            IntentFilter lowstorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
-            boolean hasLowStorage = registerReceiver(null, lowstorageFilter) != null;
+            IntentFilter lowStorageFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
+            boolean hasLowStorage = registerReceiver(null, lowStorageFilter) != null;
 
             if (hasLowStorage) {
                 Toast.makeText(this, R.string.low_storage_error, Toast.LENGTH_LONG).show();
@@ -168,7 +221,7 @@ public final class OCRCaptureActivity extends AppCompatActivity {
         mCameraSource =
                 new CameraSource.Builder(getApplicationContext(), textRecognizer)
                         .setFacing(CameraSource.CAMERA_FACING_BACK)
-                        .setRequestedPreviewSize(1280, 1024)
+                        .setRequestedPreviewSize(1920, 1536)
                         .setRequestedFps(2.0f)
                         .setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : null)
                         .setFocusMode(autoFocus ? Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE : null)
@@ -268,29 +321,19 @@ public final class OCRCaptureActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+        boolean b = scaleGestureDetector.onTouchEvent(e);
+        boolean c = gestureDetector.onTouchEvent(e);
+
+        return b || c || super.onTouchEvent(e);
+    }
+
     /**
-     * @param rawX - the raw position of the tap
-     * @param rawY - the raw position of the tap.
-     * @return true if the tap was on a TextBlock
+     * single tab listener
      */
     private boolean onTap(float rawX, float rawY) {
-        OCRGraphic graphic = mGraphicOverlay.getGraphicAtLocation(rawX, rawY);
-        TextBlock text = null;
-        if (graphic != null) {
-            text = graphic.getTextBlock();
-            if (text != null && text.getValue() != null) {
-                Log.d(TAG, "text data is being spoken! " + text.getValue());
-                // Speak the string.
-                //tts.speak(text.getValue(), TextToSpeech.QUEUE_ADD, null, "DEFAULT");
-            }
-            else {
-                Log.d(TAG, "text data is null");
-            }
-        }
-        else {
-            Log.d(TAG,"no text detected");
-        }
-        return text != null;
+        return true;
     }
 
     /**

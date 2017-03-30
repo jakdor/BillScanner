@@ -13,7 +13,7 @@
 
         <com.asi.billscanner.ui.camera.GraphicOverlay
             android:id="@+id/graphicOverlay"
-            android:layout_width="match_parent"
+            android:layout_width="390dp"
             android:layout_height="match_parent" />
 
     </com.asi.billscanner.ui.camera.CameraSourcePreview>
@@ -27,5 +27,13 @@
         android:clickable="true"
         app:fabSize="mini"
         app:srcCompat="@android:drawable/ic_menu_camera" />
+
+    <FrameLayout
+        android:id="@+id/pnlFlash"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:visibility="gone"
+        />
 
 </FrameLayout>

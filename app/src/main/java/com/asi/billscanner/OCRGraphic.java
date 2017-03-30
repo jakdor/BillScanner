@@ -15,7 +15,7 @@ import java.util.List;
  * Graphic instance for rendering TextBlock position, size, and ID within an associated graphic
  * overlay view.
  */
-public class OCRGraphic extends GraphicOverlay.Graphic {
+class OCRGraphic extends GraphicOverlay.Graphic {
 
     private int mId;
 

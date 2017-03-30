@@ -20,7 +20,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        BillFactory.lunchOnceHandler();
+
         super.onBackPressed();
     }
 }
