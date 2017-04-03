@@ -2,6 +2,7 @@ package com.asi.billscanner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * Wytyczne:
@@ -13,18 +14,33 @@ import android.content.Intent;
 
 class BillFactory {
 
-    private Context appContext;
+    private static Context appContext;
     private DbHandler dbHandler;
 
     BillFactory(Context appContext, DbHandler dbHandler){
-        this.appContext = appContext;
+        BillFactory.appContext = appContext;
         this.dbHandler = dbHandler;
     }
 
     void createNewBill(){
         lunchOCRCapture();
+    }
 
-        //tutaj reszta procesu dodawania Bill'a
+    private static void runOcrProcessing(String ocrResult){
+        lunchBillAcceptanceActivity();
+        BillProcessor billProcessor = new BillProcessor(ocrResult);
+        billProcessor.run();
+        //Bill bill = billProcessor.getResult();
+        //                  lub inne metody zwracające billa
+
+        //BillAcceptanceActivity.setBill(bill);
+    }
+
+    static void setOcrResult(String input){
+        if(!input.isEmpty()) {
+            Log.i("BillFactory", "Got ocr result");
+            runOcrProcessing(input);
+        }
     }
 
     private void lunchOCRCapture(){
@@ -32,8 +48,9 @@ class BillFactory {
         appContext.startActivity(OCRCaptureIntent);
     }
 
-    private void lunchBillAcceptanceActivity(){
+    private static void lunchBillAcceptanceActivity(){
         Intent billAcceptanceIntent = new Intent(appContext, BillAcceptanceActivity.class);
         appContext.startActivity(billAcceptanceIntent);
     }
+
 }

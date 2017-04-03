@@ -17,8 +17,6 @@ import java.util.Vector;
 class OCRProcessor implements Detector.Processor<TextBlock> {
 
     private GraphicOverlay<OCRGraphic> mGraphicOverlay;
-    private String ocrStr = "";
-
     private SparseArray<TextBlock> items;
 
     OCRProcessor(GraphicOverlay<OCRGraphic> ocrGraphicOverlay) {
@@ -85,7 +83,7 @@ class OCRProcessor implements Detector.Processor<TextBlock> {
      * Provides access to OCR results
      */
     String ocrResult(){
-        ocrStr = createOcrStr();
+        String ocrStr = createOcrStr();
 
         if(!ocrStr.isEmpty()) {
             return ocrStr;

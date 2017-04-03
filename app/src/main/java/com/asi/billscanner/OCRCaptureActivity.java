@@ -62,7 +62,7 @@ public final class OCRCaptureActivity extends AppCompatActivity {
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
 
-    private OCRProcessor ocrProcessor;
+    private OCRProcessor ocrProcessor = null;
 
     /**
      * floatingActionTakePhoto listener
@@ -82,15 +82,18 @@ public final class OCRCaptureActivity extends AppCompatActivity {
      * lunches after user decided to take snapshot, checks if ocr was successful
      */
     private void ocrEnd(){
-        String ocrStr = ocrProcessor.ocrResult();
-        if(ocrStr == null){
-            Toast toast = Toast.makeText(this, R.string.ocr_no_detection_toast, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER_HORIZONTAL| Gravity.CENTER, 0, 450);
-            toast.show();
-        }
-        else{
-            frameFlash.startAnimation(fade);
-            Log.i("OCRCaptureActivity", "SnapShot: " + ocrStr);
+        if(ocrProcessor != null) {
+            String ocrStr = ocrProcessor.ocrResult();
+            if (ocrStr == null) {
+                Toast toast = Toast.makeText(this, R.string.ocr_no_detection_toast, Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER, 0, 450);
+                toast.show();
+            } else {
+                frameFlash.startAnimation(fade);
+                Log.i("OCRCaptureActivity", "SnapShot: " + ocrStr);
+                BillFactory.setOcrResult(ocrStr);
+                finish();
+            }
         }
     }
 
@@ -330,7 +333,7 @@ public final class OCRCaptureActivity extends AppCompatActivity {
     }
 
     /**
-     * single tab listener
+     * single tap listener
      */
     private boolean onTap(float rawX, float rawY) {
         return true;
