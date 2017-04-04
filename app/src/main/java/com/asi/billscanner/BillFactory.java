@@ -28,8 +28,8 @@ class BillFactory {
 
     private static void runOcrProcessing(String ocrResult){
         lunchBillAcceptanceActivity();
-        BillProcessor billProcessor = new BillProcessor(ocrResult);
-        billProcessor.run();
+        //BillProcessor billProcessor = new BillProcessor(ocrResult);
+        //billProcessor.run();
         //Bill bill = billProcessor.getResult();
         //                  lub inne metody zwracające billa
 
