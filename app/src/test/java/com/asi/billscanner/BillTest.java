@@ -42,7 +42,7 @@ public class BillTest {
     }
 
     @Test
-    public void removeProductAtInvalidIndex() throws Exception {
+    public void tryAccessInvalidIndex() throws Exception {
         exception.expect(RuntimeException.class);
 
         bill.removeProductAtIndex(-1);
@@ -55,8 +55,6 @@ public class BillTest {
         bill.removeProductAtIndex(0);
 
         assertEquals(size - 1, bill.getProductsSize());
-
-        bill.addNewProduct(dummyName, dummyCategory, dummyAmount, dummyPrice);
     }
 
     @Test
@@ -81,6 +79,38 @@ public class BillTest {
         assertEquals(testList.get(0).category, actualList.get(0).category);
         assertEquals(testList.get(0).amount, actualList.get(0).amount);
         assertEquals(testList.get(0).price, actualList.get(0).price, 0.0001);
+    }
+
+    @Test
+    public void setProductNameAtIndex() throws Exception {
+        String testStr = "Test Name";
+        bill.setProductsNameAtIndex(0, testStr);
+
+        assertEquals(bill.getProductNameAtIndex(0), testStr);
+    }
+
+    @Test
+    public void setProductCategoryAtIndex() throws Exception {
+        String testStr = "Test Category";
+        bill.setProductsCategoryAtIndex(0, testStr);
+
+        assertEquals(bill.getProductCategoryAtIndex(0), testStr);
+    }
+
+    @Test
+    public void setProductAmountAtIndex() throws Exception {
+        int testVal = 5;
+        bill.setProductsAmountAtIndex(0, testVal);
+
+        assertEquals(bill.getProductAmountAtIndex(0), testVal);
+    }
+
+    @Test
+    public void setProductPriceAtIndex() throws Exception {
+        double testVal = 9.87;
+        bill.setProductsPrice(0, testVal);
+
+        assertEquals(bill.getProductPriceAtIndex(0), testVal, 0.0001);
     }
 
     @Test
@@ -124,8 +154,6 @@ public class BillTest {
         bill.setDate(testStr);
 
         assertEquals(testStr, bill.getDate());
-
-        bill.setDate(dummyDate);
     }
 
     @Test
@@ -141,8 +169,6 @@ public class BillTest {
         bill.setCompany(testStr);
 
         assertEquals(testStr, bill.getCompany());
-
-        bill.setCompany(dummyCompany);
     }
 
     @Test
@@ -158,8 +184,6 @@ public class BillTest {
         bill.setAddress(testStr);
 
         assertEquals(testStr, bill.getAddress());
-
-        bill.setAddress(dummyAddress);
     }
 
     @Test

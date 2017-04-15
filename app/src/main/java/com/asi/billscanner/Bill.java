@@ -10,7 +10,10 @@ import java.util.Vector;
 
 class Bill {
 
-    static class Product{ //subclass used only as a getter (optimization)
+    /**
+     * subclass used only as a getter (optimization)
+     */
+    static class Product{
         Product(String name, String category, int amount, double price){
             this.name = name;
             this.category = category;
@@ -59,7 +62,7 @@ class Bill {
 
     private void checkIndexValidity(int index){
         if(index > productsSize || index < 0){
-            throw new RuntimeException("Bill removeProductAtIndex(int index): Invalid index, memory violation!");
+            throw new RuntimeException("Bill: Invalid product index, memory violation!");
         }
     }
 
@@ -88,6 +91,26 @@ class Bill {
         }
 
         return productVector;
+    }
+
+    void setProductsNameAtIndex(int index, String value){
+        checkIndexValidity(index);
+        productsName.set(index, value);
+    }
+
+    void setProductsCategoryAtIndex(int index, String value){
+        checkIndexValidity(index);
+        productsCategory.set(index, value);
+    }
+
+    void setProductsAmountAtIndex(int index, int value){
+        checkIndexValidity(index);
+        productsAmount.set(index, value);
+    }
+
+    void setProductsPrice (int index, double value){
+        checkIndexValidity(index);
+        productsPrice.set(index, value);
     }
 
     String getProductNameAtIndex(int index){

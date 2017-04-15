@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         billFactory = new BillFactory(appContext, dbHandler);
-        dbHandler = new DbHandler();
+        dbHandler = new DbHandler(this);
 
         dummyTextView = (TextView)findViewById(R.id.dummyTextView);
 
