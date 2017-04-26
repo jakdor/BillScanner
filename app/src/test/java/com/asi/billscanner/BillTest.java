@@ -142,6 +142,25 @@ public class BillTest {
     }
 
     @Test
+    public void getBillSum(){
+        bill.addNewProduct(dummyName, dummyCategory, dummyAmount, dummyPrice);
+
+        double actualPrice = bill.getBillSum();
+
+        assertEquals(dummyPrice + dummyPrice, actualPrice, 0.0001);
+    }
+
+    @Test
+    public void getCategorySum(){
+        bill.addNewProduct(dummyName, "dvdvdvasfv dfsbvc345t5rhb", dummyAmount, dummyPrice);
+        bill.addNewProduct(dummyName, dummyCategory, dummyAmount, dummyPrice);
+
+        double actualPrice = bill.getCategorySum(dummyCategory);
+
+        assertEquals(dummyPrice + dummyPrice, actualPrice, 0.0001);
+    }
+
+    @Test
     public void getDate() throws Exception {
         String actualDate = bill.getDate();
 

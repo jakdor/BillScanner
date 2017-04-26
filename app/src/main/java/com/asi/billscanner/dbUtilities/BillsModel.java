@@ -11,7 +11,7 @@ public class BillsModel {
     private String company;
     private String address;
 
-    BillsModel(int id,
+    public BillsModel(int id,
                Timestamp addTime,
                Date billDate,
                String company,

@@ -133,6 +133,24 @@ class Bill {
         return productsPrice.get(index);
     }
 
+    double getBillSum(){
+        double sum = 0.0;
+        for(int i = 0; i < productsSize; ++i){
+            sum += productsPrice.get(i);
+        }
+        return sum;
+    }
+
+    double getCategorySum(String category){
+        double sum = 0.0;
+        for (int i = 0; i < productsSize; ++i){
+            if(productsCategory.get(i).equals(category)){
+                sum += productsPrice.get(i);
+            }
+        }
+        return sum;
+    }
+
     String getDate() {
         return date;
     }

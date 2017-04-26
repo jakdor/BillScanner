@@ -35,9 +35,16 @@ public class MainActivity extends AppCompatActivity {
 
         billFactory = new BillFactory(appContext, dbHandler);
         dbHandler = new DbHandler(this);
+        dbHandler.openDb();
 
         dummyTextView = (TextView)findViewById(R.id.dummyTextView);
 
         findViewById(R.id.scanButton).setOnTouchListener(scanButtonListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        dbHandler.closeDb();
     }
 }
