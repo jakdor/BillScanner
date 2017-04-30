@@ -19,7 +19,7 @@ class BillProcessor {
 
     }
 
-    public static void main(String[] args) {
+    public static void run() {
 
         Vector<String> productName = new Vector<>();
         Vector<Double> productAmmount = new Vector<>();
