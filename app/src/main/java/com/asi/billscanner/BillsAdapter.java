@@ -1,12 +1,14 @@
 package com.asi.billscanner;
 
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.util.Log;
 
 import java.util.Vector;
 
 class BillsAdapter {
 
+    private static final String CLASS_TAG = "BillsAdapter";
     private DbHandler dbHandler;
 
     BillsAdapter(DbHandler dbHandler){
@@ -36,14 +38,14 @@ class BillsAdapter {
         }
 
         Long billId = dbHandler.insertBills(
-                bill.getAddress(),
+                bill.getCompany(),
                 bill.getAddress(),
                 date[0],
                 date[1],
                 date[2]);
 
         if(billId == -1){
-            Log.wtf("BillsAdapter", "failed to insert bill row into db");
+            Log.wtf(CLASS_TAG, "failed to insert bill row into db");
             throw new RuntimeException("BillsAdapter: failed to insert bill row into db");
         }
 
@@ -59,7 +61,7 @@ class BillsAdapter {
                      bill.getProductNameAtIndex(i),
                      bill.getProductAmountAtIndex(i),
                      bill.getProductPriceAtIndex(i)) == -1){
-                 Log.wtf("BillsAdapter", "failed to insert product row into db");
+                 Log.wtf(CLASS_TAG, "failed to insert product row into db");
                  throw new RuntimeException("BillsAdapter: failed to insert product row into db");
              }
         }
@@ -73,7 +75,7 @@ class BillsAdapter {
 
         Cursor billsCursor = dbHandler.getBillById(id);
         if(billsCursor == null) {
-            Log.wtf("BillsAdapter", "db query returned null");
+            Log.wtf(CLASS_TAG, "db query returned null");
             throw new RuntimeException("BillsAdapter: db query returned null");
         }
 
@@ -81,26 +83,29 @@ class BillsAdapter {
         String data = billsCursor.getString(billsCursor.getColumnIndex(DbHandler.BILLS_BILL_DATE));
         String company = billsCursor.getString(billsCursor.getColumnIndex(DbHandler.BILLS_COMPANY));
         String address = billsCursor.getString(billsCursor.getColumnIndex(DbHandler.BILLS_ADDRESS));
+        int dbId = billsCursor.getInt(billsCursor.getColumnIndex(DbHandler.BILLS_ID));
         billsCursor.close();
 
-        Log.i("BillsAdapter", "Bill data from db: " + data + " " + company + " " + address);
+        Log.d(CLASS_TAG, "Bill data from db: "+ dbId + " " + data + " " + company + " " + address);
 
-        bill = new Bill(data, company, address);
+        bill = new Bill(data, company, address, dbId);
 
         Cursor productsCursor = dbHandler.getProductsByBillId(id);
         if(productsCursor == null){
-            Log.wtf("BillsAdapter", "db query returned null");
+            Log.wtf(CLASS_TAG, "db query returned null");
             throw new RuntimeException("BillsAdapter: db query returned null");
         }
 
+        Log.d(CLASS_TAG,  DatabaseUtils.dumpCursorToString(productsCursor));
+
         productsCursor.moveToFirst();
         for(int i = 0; i < productsCursor.getCount(); ++i){
-            String category = productsCursor.getString(billsCursor.getColumnIndex(DbHandler.PRODUCTS_CATEGORY));
-            String name = productsCursor.getString(billsCursor.getColumnIndex(DbHandler.PRODUCTS_PRODUCT_NAME));
-            int amount = productsCursor.getInt(billsCursor.getColumnIndex(DbHandler.PRODUCTS_AMOUNT));
-            int price = productsCursor.getInt(billsCursor.getColumnIndex(DbHandler.PRODUCTS_PRICE));
+            String category = productsCursor.getString(productsCursor.getColumnIndex(DbHandler.PRODUCTS_CATEGORY));
+            String name = productsCursor.getString(productsCursor.getColumnIndex(DbHandler.PRODUCTS_PRODUCT_NAME));
+            double amount = productsCursor.getDouble(productsCursor.getColumnIndex(DbHandler.PRODUCTS_AMOUNT));
+            int price = productsCursor.getInt(productsCursor.getColumnIndex(DbHandler.PRODUCTS_PRICE));
 
-            double finalPrice = (double) price/100 + (double)price % 100;
+            double finalPrice = (double)price/100.0;
             bill.addNewProduct(name, category, amount, finalPrice);
 
             productsCursor.moveToNext();
@@ -114,12 +119,27 @@ class BillsAdapter {
     Vector <Bill> getBillsWithDate(int day, int month, int year){
         Vector <Bill> bills = new Vector<>();
 
+        Cursor billIds = dbHandler.getBillsIdFromDay(day, month, year);
+        if(billIds == null){
+            Log.wtf(CLASS_TAG, "db query returned null");
+            throw new RuntimeException("BillsAdapter: db query returned null");
+        }
+
+        Log.d(CLASS_TAG, DatabaseUtils.dumpCursorToString(billIds));
+
+        billIds.moveToFirst();
+        for(int i = 0; i < billIds.getCount(); ++i){
+            bills.add(getBillById(billIds.getInt(billIds.getColumnIndex(DbHandler.BILLS_ID))));
+            billIds.moveToNext();
+        }
+        billIds.close();
+
         return bills;
     }
 
     //todo implement this (duh!)
     /**
-     * CategorySum queries - returns products price filtered by cattegory from given period
+     * CategorySum queries - returns products price filtered by category from given period
      */
     double getCategorySum(String category, int fromDay, int fromMonth,
                              int fromYear, int toDay, int toMonth, int toYear){
@@ -138,7 +158,8 @@ class BillsAdapter {
      * Sum queries - returns products price from given period
      */
     double getSum(int fromDay, int fromMonth, int fromYear, int toDay, int toMonth, int toYear){
-        return 0;
+        Cursor sumCursor = dbHandler.getSumFromTo(fromDay, fromMonth, fromYear, toDay, toMonth, toYear);
+        return getSumCore(sumCursor);
     }
 
     double getSum(int day, int month, int year){
@@ -156,13 +177,12 @@ class BillsAdapter {
      */
     private double getSumCore(Cursor sumCursor){
         if(sumCursor == null){
-            Log.wtf("BillsAdapter", "db query returned null");
+            Log.wtf(CLASS_TAG, "db query returned null");
             throw new RuntimeException("BillAdapter: db query returned null");
         }
 
         sumCursor.moveToFirst();
-        double sum = (double)sumCursor.getInt(0);
-        sum = sum/100 + sum % 100;
+        double sum = sumCursor.getDouble(0) / 100.0;
         sumCursor.close();
 
         return sum;
@@ -173,12 +193,12 @@ class BillsAdapter {
      */
     void deleteBillById(int id){
         if(!dbHandler.deleteBills(id)){
-            Log.wtf("BillsAdapter", "failed to delete bill row from db");
+            Log.wtf(CLASS_TAG, "failed to delete bill row from db");
             throw new RuntimeException("BillAdapter: failed to delete bill row from db");
         }
 
         if(!dbHandler.deleteProductsByBillId(id)){
-            Log.wtf("BillsAdapter", "failed to delete products row/s from db");
+            Log.wtf(CLASS_TAG, "failed to delete products row/s from db");
             throw new RuntimeException("BillAdapter: failed to delete products row/s from db");
         }
     }
@@ -188,7 +208,7 @@ class BillsAdapter {
      */
     void deleteProductsByName(int billId, String productName){
         if(!dbHandler.deleteProductsByName(billId, productName)){
-            Log.wtf("BillsAdapter", "failed to delete product linked to given bill");
+            Log.wtf(CLASS_TAG, "failed to delete product linked to given bill");
             throw new RuntimeException("BillAdapter: failed to delete product linked to given bill");
         }
     }

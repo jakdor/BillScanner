@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
 
     private BillFactory billFactory;
     private DbHandler dbHandler;
+    BillsAdapter billsAdapter;
 
     private TextView dummyTextView;
 
@@ -35,11 +36,20 @@ public class MainActivity extends AppCompatActivity {
 
         billFactory = new BillFactory(appContext, dbHandler);
         dbHandler = new DbHandler(this);
+        billsAdapter = new BillsAdapter(dbHandler);
         dbHandler.openDb();
 
         dummyTextView = (TextView)findViewById(R.id.dummyTextView);
 
         findViewById(R.id.scanButton).setOnTouchListener(scanButtonListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!dbHandler.isDbOpen()) {
+            dbHandler.openDb();
+        }
     }
 
     @Override

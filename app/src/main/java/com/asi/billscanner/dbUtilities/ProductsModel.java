@@ -6,14 +6,14 @@ public class ProductsModel {
     private int billId;
     private String category;
     private String productName;
-    private int amount;
+    private double amount;
     private int price;
 
     ProductsModel(int id,
                   int billId,
                   String category,
                   String productName,
-                  int amount,
+                  double amount,
                   int price){
         this.id = id;
         this.billId = billId;
@@ -56,11 +56,11 @@ public class ProductsModel {
         this.productName = productName;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 

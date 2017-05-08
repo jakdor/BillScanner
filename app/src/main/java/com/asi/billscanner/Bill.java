@@ -14,7 +14,7 @@ class Bill {
      * subclass used only as a getter (optimization)
      */
     static class Product{
-        Product(String name, String category, int amount, double price){
+        Product(String name, String category, double amount, double price){
             this.name = name;
             this.category = category;
             this.amount = amount;
@@ -23,7 +23,7 @@ class Bill {
 
         String name;
         String category;
-        int amount;
+        double amount;
         double price;
     }
 
@@ -34,9 +34,11 @@ class Bill {
     //products
     private List <String> productsName;
     private List <String> productsCategory;
-    private List <Integer> productsAmount;
+    private List <Double> productsAmount;
     private List <Double> productsPrice;
     private int productsSize = 0;
+
+    private int dbId = -1;
 
     Bill(){
         productsName = new Vector<>();
@@ -52,7 +54,12 @@ class Bill {
         this.address = address;
     }
 
-    void addNewProduct(String name, String category, int amount, double price){
+    Bill(String date, String company, String address, int dbId){
+        this(date, company, address);
+        this.dbId = dbId;
+    }
+
+    void addNewProduct(String name, String category, double amount, double price){
         productsName.add(name);
         productsCategory.add(category);
         productsAmount.add(amount);
@@ -103,7 +110,7 @@ class Bill {
         productsCategory.set(index, value);
     }
 
-    void setProductsAmountAtIndex(int index, int value){
+    void setProductsAmountAtIndex(int index, double value){
         checkIndexValidity(index);
         productsAmount.set(index, value);
     }
@@ -123,7 +130,7 @@ class Bill {
         return productsCategory.get(index);
     }
 
-    int getProductAmountAtIndex(int index){
+    double getProductAmountAtIndex(int index){
         checkIndexValidity(index);
         return productsAmount.get(index);
     }
@@ -177,5 +184,16 @@ class Bill {
 
     int getProductsSize() {
         return productsSize;
+    }
+
+    /**
+     * will return corresponding id from db bills table , if not loaded from db: -1
+     */
+    int getDbId() {
+        return dbId;
+    }
+
+    void setDbId(int dbId) {
+        this.dbId = dbId;
     }
 }

@@ -35,8 +35,8 @@ class DbHandler {
 
     private static final String CLASS_TAG = "DbHandler";
 
-    private static final int DB_VERSION = 1;
-    private static final String DB_NAME = "database.db";
+    static final int DB_VERSION = 1;
+    static final String DB_NAME = "database.db";
 
     static final String TABLE_BILLS = "bills";
 
@@ -64,28 +64,29 @@ class DbHandler {
     static final String TABLE_PRODUCTS = "products";
 
     static final String PRODUCTS_ID = "_id";
-    static final String PRODUCTS_BILL_ID = "billId";
     static final String PRODUCTS_CATEGORY = "category";
     static final String PRODUCTS_PRODUCT_NAME = "productName";
     static final String PRODUCTS_AMOUNT = "amount";
     static final String PRODUCTS_PRICE = "price";
+    static final String PRODUCTS_BILL_ID = "billId";
 
     private static final int PRODUCTS_ID_COL = 0;
-    private static final int PRODUCTS_BILL_ID_COL = 1;
-    private static final int PRODUCTS_CETEGORY_COL = 2;
-    private static final int PRODUCTS_PRODUCT_NAME_COL = 3;
-    private static final int PRODUCTS_AMOUNT_COL = 4;
-    private static final int PRODUCTS_PRICE_COL = 5;
+    private static final int PRODUCTS_CATEGORY_COL = 1;
+    private static final int PRODUCTS_PRODUCT_NAME_COL = 2;
+    private static final int PRODUCTS_AMOUNT_COL = 3;
+    private static final int PRODUCTS_PRICE_COL = 4;
+    private static final int PRODUCTS_BILL_ID_COL = 5;
 
     //price - currency stored in cents(grosze)
     private static final String DB_CREATE_PRODUCTS_TABLE =
             "CREATE TABLE " + TABLE_PRODUCTS + "(" +
                     PRODUCTS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "FOREIGN KEY (" + PRODUCTS_BILL_ID + ") REFERENCES " + TABLE_BILLS + "(" + BILLS_ID + "), " +
                     PRODUCTS_CATEGORY + " VARCHAR(64), " +
                     PRODUCTS_PRODUCT_NAME + " VARCHAR(128), " +
-                    PRODUCTS_AMOUNT + " INTEGER, " +
-                    PRODUCTS_PRICE + " INTEGER" +
+                    PRODUCTS_AMOUNT + " REAL, " +
+                    PRODUCTS_PRICE + " INTEGER, " +
+                    PRODUCTS_BILL_ID + " INTEGER, " +
+                    "FOREIGN KEY (" + PRODUCTS_BILL_ID + ") REFERENCES " + TABLE_BILLS + "(" + BILLS_ID + ")" +
                     ");";
 
     private SQLiteDatabase db;
@@ -97,6 +98,7 @@ class DbHandler {
         public DatabaseHelper(Context context, String name,
                               CursorFactory cursorFactory, int version){
             super(context, name, cursorFactory, version);
+            Log.i(CLASS_TAG, "Checking local db status...");
         }
 
         @Override
@@ -104,12 +106,12 @@ class DbHandler {
             db.execSQL(DB_CREATE_BILLS_TABLE);
             Log.i(CLASS_TAG, "Created " + TABLE_BILLS + " table ver." + DB_VERSION);
             db.execSQL(DB_CREATE_PRODUCTS_TABLE);
-            Log.i(CLASS_TAG, "Created " + TABLE_PRODUCTS + " tab ver." + DB_VERSION);
+            Log.i(CLASS_TAG, "Created " + TABLE_PRODUCTS + " table ver." + DB_VERSION);
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
+            Log.i(CLASS_TAG, "Updating local db to ver." + DB_VERSION);
         }
     }
 
@@ -121,14 +123,24 @@ class DbHandler {
         dbHelper = new DatabaseHelper(context, DB_NAME, null, DB_VERSION);
         try {
             db = dbHelper.getWritableDatabase();
+            Log.i(CLASS_TAG, "Local db access established");
         }catch (Exception e){
             Log.wtf(CLASS_TAG, "Can't get db access: " + e.getMessage());
         }
         return this;
     }
 
+    boolean isDbOpen(){
+        return db.isOpen();
+    }
+
     void closeDb(){
         db.close();
+        Log.i(CLASS_TAG, "closed local db connection");
+    }
+
+    private String intDateToDbFormat(int input){
+        return input < 10 ? "0" + Integer.toString(input) : Integer.toString(input);
     }
 
     /**
@@ -137,8 +149,8 @@ class DbHandler {
     long insertBills(String company, String address, int billYear, int billMonth, int billDay){
 
         String billDate = Integer.toString(billYear) + "-"
-                + Integer.toString(billMonth) + "-"
-                + Integer.toString(billDay);
+                + intDateToDbFormat(billMonth) + "-"
+                + intDateToDbFormat(billDay);
 
         ContentValues contentValues = new ContentValues();
         contentValues.put(BILLS_BILL_DATE, billDate);
@@ -174,8 +186,15 @@ class DbHandler {
     }
 
     Cursor getBillById(int id){
-        String[] columns = {BILLS_BILL_DATE, BILLS_COMPANY, BILLS_ADDRESS};
+        String[] columns = {BILLS_BILL_DATE, BILLS_COMPANY, BILLS_ADDRESS, BILLS_ID};
         String where = BILLS_ID + "=" + Integer.toString(id);
+        return db.query(TABLE_BILLS, columns, where, null, null, null, null);
+    }
+
+    Cursor getBillsIdFromDay(int day, int month, int year){
+        String[] columns = {BILLS_ID};
+        String date = Integer.toString(year) + "-" + intDateToDbFormat(month) + "-" + intDateToDbFormat(day);
+        String where = BILLS_BILL_DATE + "='" + date + "'";
         return db.query(TABLE_BILLS, columns, where, null, null, null, null);
     }
 
@@ -187,16 +206,16 @@ class DbHandler {
     /**
      * operations on products table
      */
-    long insertProducts(long billId, String category, String productName, int amount, double price){
+    long insertProducts(long billId, String category, String productName, double amount, double price){
 
         int cash = (int)(price * 100);
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(PRODUCTS_BILL_ID, billId);
         contentValues.put(PRODUCTS_CATEGORY, category);
         contentValues.put(PRODUCTS_PRODUCT_NAME,  productName);
         contentValues.put(PRODUCTS_AMOUNT, amount);
         contentValues.put(PRODUCTS_PRICE, cash);
+        contentValues.put(PRODUCTS_BILL_ID, billId);
 
         return db.insert(TABLE_PRODUCTS, null, contentValues);
     }
@@ -227,7 +246,7 @@ class DbHandler {
 
     boolean deleteProductsByName(int billId, String productName){
         String where = PRODUCTS_BILL_ID + "=" + Integer.toString(billId) + " AND " +
-                PRODUCTS_PRODUCT_NAME + "=" + productName;
+                PRODUCTS_PRODUCT_NAME + "='" + productName +"'";
 
         return db.delete(TABLE_PRODUCTS, where, null) > 0;
     }
@@ -242,19 +261,34 @@ class DbHandler {
     }
 
     Cursor getDaySum(int day, int month, int year){
-        String date = Integer.toString(year) + "-" + Integer.toString(month) + "-" + Integer.toString(day);
-        String where = PRODUCTS_BILL_ID + "=(SELECT " + BILLS_ID + " FROM " + TABLE_BILLS + " WHERE " +
-                BILLS_BILL_DATE + " = " + date + ")";
-        String query = "SELECT SUM(" + PRODUCTS_PRICE + ") FROM " + TABLE_PRODUCTS + " WHERE " + where;
+        String date = Integer.toString(year) + "-" + intDateToDbFormat(month) + "-" + intDateToDbFormat(day);
+        String where = TABLE_BILLS + "." + BILLS_BILL_DATE + " = '" + date + "'";
+        String query = "SELECT SUM(" + PRODUCTS_AMOUNT +
+                " * " + PRODUCTS_PRICE + ") FROM " + TABLE_PRODUCTS +
+                " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." + BILLS_ID + "=" +
+                TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID +
+                " WHERE " + where;
         return db.rawQuery(query, null);
     }
 
     Cursor getMonthSum(int month, int year){
-        String dataPart = "DATEPART(year," + BILLS_BILL_DATE + ")=" + Integer.toString(year) + " AND " +
-                "DATEPART(month," + BILLS_BILL_DATE + ")=" + Integer.toString(month);
-        String where = PRODUCTS_BILL_ID +
-                "=(SELECT " + BILLS_ID + " FROM " + TABLE_BILLS + " WHERE " + dataPart + ")";
-        String query = "SELECT SUM(" + PRODUCTS_PRICE + ") FROM " + TABLE_PRODUCTS + " WHERE " + where;
+        String where = TABLE_BILLS + "." + BILLS_BILL_DATE + " LIKE '" + Integer.toString(year) +
+                "-" + intDateToDbFormat(month) + "%'";
+        String query = "SELECT SUM(" +  PRODUCTS_AMOUNT + " * " +  PRODUCTS_PRICE + ") FROM " +
+                TABLE_PRODUCTS + " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." +
+                BILLS_ID + "=" + TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID + " WHERE " + where;
+        return db.rawQuery(query, null);
+    }
+
+    Cursor getSumFromTo(int fromDay, int fromMonth, int fromYear, int toDay, int toMonth, int toYear){
+        String[] day = {intDateToDbFormat(fromDay), intDateToDbFormat(toDay)};
+        String[] month = {intDateToDbFormat(fromMonth), intDateToDbFormat(toMonth)};
+        String where = TABLE_BILLS + "." + BILLS_BILL_DATE + " between '" +
+                Integer.toString(fromYear) + "-" + month[0] + "-" + day[0] + "' and '" +
+                Integer.toString(toYear) + "-" + month[1] + "-" + day[1] + "'";
+        String query = "SELECT SUM(" +  PRODUCTS_AMOUNT + " * " +  PRODUCTS_PRICE + ") FROM " +
+                TABLE_PRODUCTS + " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." +
+                BILLS_ID + "=" + TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID + " WHERE " + where;
         return db.rawQuery(query, null);
     }
 
