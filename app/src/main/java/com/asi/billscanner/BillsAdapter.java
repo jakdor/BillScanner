@@ -4,6 +4,8 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.util.Log;
 
+import com.asi.billscanner.dbUtilities.BillsModel;
+
 import java.util.Vector;
 
 class BillsAdapter {
@@ -46,7 +48,7 @@ class BillsAdapter {
 
         if(billId == -1){
             Log.wtf(CLASS_TAG, "failed to insert bill row into db");
-            throw new RuntimeException("BillsAdapter: failed to insert bill row into db");
+            throw new RuntimeException(CLASS_TAG + ": failed to insert bill row into db");
         }
 
         int productsCount = bill.getProductsSize();
@@ -62,9 +64,34 @@ class BillsAdapter {
                      bill.getProductAmountAtIndex(i),
                      bill.getProductPriceAtIndex(i)) == -1){
                  Log.wtf(CLASS_TAG, "failed to insert product row into db");
-                 throw new RuntimeException("BillsAdapter: failed to insert product row into db");
+                 throw new RuntimeException(CLASS_TAG + ": failed to insert product row into db");
              }
         }
+    }
+
+    /**
+     * update Bill existing in db
+     */
+    void updateBillInDB(Bill bill){
+        if(bill.getDbId() == -1){
+            Log.e(CLASS_TAG, "bill has unspecified dbId field");
+            throw new RuntimeException(CLASS_TAG + ": bill has unspecified dbId field");
+        }
+
+        BillsModel billsModel = new BillsModel(
+                bill.getDbId(), null, bill.getDate(), bill.getCompany(), bill.getAddress());
+
+        deleteProductsByBillId(bill.getDbId());
+
+        for(int i = 0; i < bill.getProductsSize(); ++i) {
+            dbHandler.insertProducts(bill.getDbId(),
+                    bill.getProductCategoryAtIndex(i),
+                    bill.getProductNameAtIndex(i),
+                    bill.getProductAmountAtIndex(i),
+                    bill.getProductPriceAtIndex(i));
+        }
+
+        dbHandler.updateBills(billsModel);
     }
 
     /**
@@ -76,7 +103,7 @@ class BillsAdapter {
         Cursor billsCursor = dbHandler.getBillById(id);
         if(billsCursor == null) {
             Log.wtf(CLASS_TAG, "db query returned null");
-            throw new RuntimeException("BillsAdapter: db query returned null");
+            throw new RuntimeException(CLASS_TAG + ": db query returned null");
         }
 
         billsCursor.moveToFirst();
@@ -93,7 +120,7 @@ class BillsAdapter {
         Cursor productsCursor = dbHandler.getProductsByBillId(id);
         if(productsCursor == null){
             Log.wtf(CLASS_TAG, "db query returned null");
-            throw new RuntimeException("BillsAdapter: db query returned null");
+            throw new RuntimeException(CLASS_TAG + ": db query returned null");
         }
 
         Log.d(CLASS_TAG,  DatabaseUtils.dumpCursorToString(productsCursor));
@@ -122,7 +149,7 @@ class BillsAdapter {
         Cursor billIds = dbHandler.getBillsIdFromDay(day, month, year);
         if(billIds == null){
             Log.wtf(CLASS_TAG, "db query returned null");
-            throw new RuntimeException("BillsAdapter: db query returned null");
+            throw new RuntimeException(CLASS_TAG + ": db query returned null");
         }
 
         Log.d(CLASS_TAG, DatabaseUtils.dumpCursorToString(billIds));
@@ -137,21 +164,24 @@ class BillsAdapter {
         return bills;
     }
 
-    //todo implement this (duh!)
     /**
      * CategorySum queries - returns products price filtered by category from given period
      */
     double getCategorySum(String category, int fromDay, int fromMonth,
                              int fromYear, int toDay, int toMonth, int toYear){
-        return 0;
+        Cursor sumCursor = dbHandler.getCategorySumFromTo(
+                category, fromDay, fromMonth, fromYear, toDay, toMonth, toYear);
+        return getSumCore(sumCursor);
     }
 
     double getCategorySum(String category, int day, int month, int year){
-        return 0;
+        Cursor sumCursor = dbHandler.getCategoryDaySum(category, day, month, year);
+        return getSumCore(sumCursor);
     }
 
     double getCategorySum(String category, int month, int year){
-        return 0;
+        Cursor sumCursor = dbHandler.getCategoryMonthSum(category, month, year);
+        return getSumCore(sumCursor);
     }
 
     /**
@@ -178,7 +208,7 @@ class BillsAdapter {
     private double getSumCore(Cursor sumCursor){
         if(sumCursor == null){
             Log.wtf(CLASS_TAG, "db query returned null");
-            throw new RuntimeException("BillAdapter: db query returned null");
+            throw new RuntimeException(CLASS_TAG + ": db query returned null");
         }
 
         sumCursor.moveToFirst();
@@ -188,18 +218,36 @@ class BillsAdapter {
         return sum;
     }
 
+    Vector<String> getUsedCategories(){
+        Vector<String> categories = new Vector<>();
+
+        Cursor categoriesCursor = dbHandler.getUsedCategories();
+        if(categoriesCursor == null){
+            Log.wtf(CLASS_TAG, "db query returned null");
+            throw new RuntimeException(CLASS_TAG + ": db query returned null");
+        }
+
+        categoriesCursor.moveToFirst();
+        for(int i = 0; i < categoriesCursor.getCount(); ++i){
+            categories.add(categoriesCursor.getString(0));
+            categoriesCursor.moveToNext();
+        }
+
+        return categories;
+    }
+
     /**
      * delete bill row and linked products
      */
     void deleteBillById(int id){
         if(!dbHandler.deleteBills(id)){
             Log.wtf(CLASS_TAG, "failed to delete bill row from db");
-            throw new RuntimeException("BillAdapter: failed to delete bill row from db");
+            throw new RuntimeException(CLASS_TAG + ": failed to delete bill row from db");
         }
 
         if(!dbHandler.deleteProductsByBillId(id)){
             Log.wtf(CLASS_TAG, "failed to delete products row/s from db");
-            throw new RuntimeException("BillAdapter: failed to delete products row/s from db");
+            throw new RuntimeException(CLASS_TAG + ": failed to delete products row/s from db");
         }
     }
 
@@ -209,7 +257,17 @@ class BillsAdapter {
     void deleteProductsByName(int billId, String productName){
         if(!dbHandler.deleteProductsByName(billId, productName)){
             Log.wtf(CLASS_TAG, "failed to delete product linked to given bill");
-            throw new RuntimeException("BillAdapter: failed to delete product linked to given bill");
+            throw new RuntimeException(CLASS_TAG + ": failed to delete product linked to given bill");
+        }
+    }
+
+    /**
+     * delete all products from bill
+     */
+    void deleteProductsByBillId(int billId){
+        if(!dbHandler.deleteProductsByBillId(billId)){
+            Log.wtf(CLASS_TAG, "failed to delete all products linked to given bill");
+            throw new RuntimeException(CLASS_TAG + ": failed to delete all products linked to given bill");
         }
     }
 }

@@ -12,7 +12,9 @@ import static junit.framework.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import java.util.Vector;
@@ -41,6 +43,9 @@ public class DbTest{
     private final String DUMMY_CATEGORY_2 = "Hobby";
     private final double DUMMY_AMOUNT_2 = 1.0;
     private final double DUMMY_PRICE_2 = 13.99;
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -142,6 +147,31 @@ public class DbTest{
     }
 
     @Test
+    public void InvalidBillInUpdateBillInDb() throws Exception {
+        Bill dummyBill = new Bill(DUMMY_COMPANY_1, DUMMY_COMPANY_1, DUMMY_ADDRESS_1);
+        exception.expect(RuntimeException.class);
+
+        billsAdapter.updateBillInDB(dummyBill);
+    }
+
+    @Test
+    public void updateBillInDb() throws Exception {
+        Bill bill = billsAdapter.getBillById(1);
+        bill.removeProductAtIndex(1);
+        Cursor productsCursor = dbHandler.getAllProducts();
+        int productsCursorCount = productsCursor.getCount();
+        productsCursor.close();
+
+        billsAdapter.updateBillInDB(bill);
+        double sum = billsAdapter.getSum(1, 2, 2017);
+        productsCursor = dbHandler.getAllProducts();
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        assertEquals(productsCursorCount - 1, productsCursor.getCount());
+
+        productsCursor.close();
+    }
+
+    @Test
     public void getBillById() throws Exception {
         Bill bill = billsAdapter.getBillById(1);
 
@@ -182,25 +212,53 @@ public class DbTest{
 
     @Test
     public void getCategorySumFromTo() throws Exception {
+        double sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 1, 2, 2017, 3, 2, 2017);
 
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1 + DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 3, 4, 2015, 2, 6, 2018);
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1 + DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 1, 2, 2017, 1, 2, 2017);
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_2, 1, 2, 2017, 1, 2, 2017);
+        assertEquals(DUMMY_AMOUNT_2 * DUMMY_PRICE_2, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 3, 2, 2017, 21, 2, 2017);
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 3, 2, 2018, 10, 2, 2013);
+        assertEquals(0.0, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 1, 1, 2017, 33, 1, 2017);
+        assertEquals(0.0, sum, DELTA);
     }
 
     @Test
     public void getCategorySumDay() throws Exception {
+        double sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 1, 2, 2017);
 
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_2, 3, 2, 2017);
+        assertEquals(DUMMY_AMOUNT_2 * DUMMY_PRICE_2, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_2, 4, 2, 2017);
+        assertEquals(0.0, sum, DELTA);
+        sum = billsAdapter.getCategorySum("dupa", 3, 2, 2017);
+        assertEquals(0.0, sum, DELTA);
+        sum = billsAdapter.getCategorySum("dupa", 2, 2, 2017);
+        assertEquals(0.0, sum, DELTA);
     }
 
     @Test
     public void getCategorySumMonth() throws Exception {
+        double sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 2, 2017);
 
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1 + DUMMY_AMOUNT_1 * DUMMY_PRICE_1, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_2, 2, 2017);
+        assertEquals(DUMMY_AMOUNT_2 * DUMMY_PRICE_2 + DUMMY_AMOUNT_2 * DUMMY_PRICE_2, sum, DELTA);
+        sum = billsAdapter.getCategorySum(DUMMY_CATEGORY_1, 4, 2017);
+        assertEquals(0.0, sum, DELTA);
+        sum = billsAdapter.getCategorySum("dupa", 2, 2017);
+        assertEquals(0.0, sum, DELTA);
     }
 
     @Test
     public void getSumFromTo() throws Exception {
-        Cursor productsCursor = dbHandler.getAllProducts();
-        Log.i("TEST", DatabaseUtils.dumpCursorToString(productsCursor));
-        productsCursor.close();
-
         double sum = billsAdapter.getSum(1, 2, 2017, 3, 2, 2017);
 
         assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1 + DUMMY_AMOUNT_2 * DUMMY_PRICE_2
@@ -241,6 +299,15 @@ public class DbTest{
         assertEquals(0.0, sum, DELTA);
         sum = billsAdapter.getSum(2, 2011);
         assertEquals(0.0, sum, DELTA);
+    }
+
+    @Test
+    public void getUsedCategories() throws Exception {
+        Vector<String> categories = billsAdapter.getUsedCategories();
+
+        assertEquals(2, categories.size());
+        assertEquals(DUMMY_CATEGORY_2, categories.get(0));
+        assertEquals(DUMMY_CATEGORY_1, categories.get(1));
     }
 
     @Test
@@ -300,5 +367,20 @@ public class DbTest{
                 productsCursor.getString(productsCursor.getColumnIndex(DbHandler.PRODUCTS_PRODUCT_NAME)));
 
         productsCursor.close();
+    }
+
+    @Test
+    public void deleteProductsByBillId() throws Exception {
+        Cursor productsCursor = dbHandler.getAllProducts();
+        int productsCursorCount = productsCursor.getCount();
+        productsCursor.close();
+
+        billsAdapter.deleteProductsByBillId(1);
+        productsCursor = dbHandler.getAllProducts();
+
+        assertEquals(productsCursorCount - 2, productsCursor.getCount());
+        assertEquals(0.0, billsAdapter.getSum(1, 2, 2017));
+        double sum = billsAdapter.getSum(3, 2, 2017);
+        assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1 + DUMMY_AMOUNT_2 * DUMMY_PRICE_2, sum, DELTA);
     }
 }

@@ -164,16 +164,8 @@ class DbHandler {
 
         String where = BILLS_ID + "=" + Integer.toString(bill.getId());
 
-        Date date = bill.getBillDate();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-
-        String billDate = Integer.toString(calendar.get(Calendar.YEAR)) + "-"
-                + Integer.toString(calendar.get(Calendar.MONTH)) + "-"
-                + Integer.toString(calendar.get(Calendar.DAY_OF_MONTH));
-
         ContentValues contentValues = new ContentValues();
-        contentValues.put(BILLS_BILL_DATE, billDate);
+        contentValues.put(BILLS_BILL_DATE, bill.getBillDate());
         contentValues.put(BILLS_COMPANY, bill.getCompany());
         contentValues.put(BILLS_ADDRESS, bill.getAddress());
 
@@ -260,6 +252,42 @@ class DbHandler {
         return db.query(TABLE_PRODUCTS, columns, where, null, null, null, null);
     }
 
+    Cursor getCategoryDaySum(String category, int day, int month, int year){
+        String where = TABLE_PRODUCTS + "." + PRODUCTS_CATEGORY + "='" + category + "' and " +
+                TABLE_BILLS + "." + BILLS_BILL_DATE + " = '" + Integer.toString(year) + "-" +
+                intDateToDbFormat(month) + "-" + intDateToDbFormat(day) + "'";
+        String query = "SELECT SUM(" + PRODUCTS_AMOUNT +
+                " * " + PRODUCTS_PRICE + ") FROM " + TABLE_PRODUCTS +
+                " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." + BILLS_ID + "=" +
+                TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID +
+                " WHERE " + where;
+        return db.rawQuery(query, null);
+    }
+
+    Cursor getCategoryMonthSum(String category, int month, int year) {
+        String where = TABLE_PRODUCTS + "." + PRODUCTS_CATEGORY + "='" + category +
+                "' and " + TABLE_BILLS + "." + BILLS_BILL_DATE + " LIKE '" + Integer.toString(year)
+                + "-" + intDateToDbFormat(month) + "%'";
+        String query = "SELECT SUM(" +  PRODUCTS_AMOUNT + " * " +  PRODUCTS_PRICE + ") FROM " +
+                TABLE_PRODUCTS + " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." +
+                BILLS_ID + "=" + TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID + " WHERE " + where;
+        return db.rawQuery(query, null);
+    }
+
+    Cursor getCategorySumFromTo(String category, int fromDay, int fromMonth, int fromYear,
+                                int toDay, int toMonth, int toYear) {
+        String[] day = {intDateToDbFormat(fromDay), intDateToDbFormat(toDay)};
+        String[] month = {intDateToDbFormat(fromMonth), intDateToDbFormat(toMonth)};
+        String where = TABLE_PRODUCTS + "." + PRODUCTS_CATEGORY + "='" + category +
+                "' and " + TABLE_BILLS + "." + BILLS_BILL_DATE + " between '" +
+                Integer.toString(fromYear) + "-" + month[0] + "-" + day[0] + "' and '" +
+                Integer.toString(toYear) + "-" + month[1] + "-" + day[1] + "'";
+        String query = "SELECT SUM(" +  PRODUCTS_AMOUNT + " * " +  PRODUCTS_PRICE + ") FROM " +
+                TABLE_PRODUCTS + " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." +
+                BILLS_ID + "=" + TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID + " WHERE " + where;
+        return db.rawQuery(query, null);
+    }
+
     Cursor getDaySum(int day, int month, int year){
         String date = Integer.toString(year) + "-" + intDateToDbFormat(month) + "-" + intDateToDbFormat(day);
         String where = TABLE_BILLS + "." + BILLS_BILL_DATE + " = '" + date + "'";
@@ -290,6 +318,11 @@ class DbHandler {
                 TABLE_PRODUCTS + " INNER JOIN " + TABLE_BILLS + " on " + TABLE_BILLS + "." +
                 BILLS_ID + "=" + TABLE_PRODUCTS + "." + PRODUCTS_BILL_ID + " WHERE " + where;
         return db.rawQuery(query, null);
+    }
+
+    Cursor getUsedCategories(){
+        String[] columns = {PRODUCTS_CATEGORY};
+        return db.query(TABLE_PRODUCTS, columns, null, null, columns[0], null, columns[0]);
     }
 
     Cursor getAllProducts(){

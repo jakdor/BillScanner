@@ -7,13 +7,13 @@ public class BillsModel {
 
     private int id;
     private Timestamp addTime;
-    private Date billDate;
+    private String billDate;
     private String company;
     private String address;
 
     public BillsModel(int id,
                Timestamp addTime,
-               Date billDate,
+               String billDate,
                String company,
                String address){
         this.id = id;
@@ -40,11 +40,11 @@ public class BillsModel {
         this.addTime = addTime;
     }
 
-    public Date getBillDate() {
+    public String getBillDate() {
         return billDate;
     }
 
-    public void setBillDate(Date billDate) {
+    public void setBillDate(String billDate) {
         this.billDate = billDate;
     }
 
