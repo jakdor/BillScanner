@@ -1,7 +1,6 @@
 package com.asi.billscanner;
 
 import android.util.Log;
-import android.util.MutableInt;
 
 import java.util.Vector;
 
@@ -19,7 +18,7 @@ class BillProcessor {
 
     }
 
-    public static void run() {
+    public void run() {
 
         Vector<String> productName = new Vector<>();
         Vector<Double> productAmmount = new Vector<>();
@@ -86,8 +85,8 @@ class BillProcessor {
 
     }
 
-    private static void processLine(String line, Vector<String> productName, Vector<Double> productAmmount, Vector<Double> productSinglePrice, Vector<Double> productSumPrice) {
-        String billString = new String(line);
+    private void processLine(String line, Vector<String> productName, Vector<Double> productAmmount, Vector<Double> productSinglePrice, Vector<Double> productSumPrice) {
+        String billString = line;
         int[] subStringBegin = {0};
         int[] subStringEnd = {0};
 
@@ -132,7 +131,7 @@ class BillProcessor {
 
     }
 
-    private static double searchNumber(String string, int[] subStringBegin, int[] subStringEnd) {
+    private double searchNumber(String string, int[] subStringBegin, int[] subStringEnd) {
         for (int i = subStringBegin[0]; i < string.length(); i++) {
             if (isNumber(string.charAt(i))) {
                 subStringBegin[0] = i;
@@ -149,7 +148,7 @@ class BillProcessor {
         return Double.parseDouble(string.substring(subStringBegin[0], subStringEnd[0]));
     }
 
-    private static String searchWord(String string, int[] subStringBegin, int[] subStringEnd) {
+    private String searchWord(String string, int[] subStringBegin, int[] subStringEnd) {
 
 
         int noLetter = 0;
@@ -173,18 +172,18 @@ class BillProcessor {
 
     }
 
-    private static boolean isLetter(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ? true : false;
+    private boolean isLetter(char c) {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
 
     }
 
-    private static boolean isNumber(char c) {
-        return (c >= '0' && c <= '9') || c == '.' ? true : false;
+    private boolean isNumber(char c) {
+        return (c >= '0' && c <= '9') || c == '.';
 
     }
 
-    private static boolean checkSimilarity(String lineString, String patternString, double simPercentage) {
-        String examinedString = new String(lineString);
+    private boolean checkSimilarity(String lineString, String patternString, double simPercentage) {
+        String examinedString = lineString;
 
         int patternCounter;
         int examinedCounter;
@@ -212,10 +211,7 @@ class BillProcessor {
         similarity = (double) sameLetters / patternStringLength - Math.abs((examindedStringLength - patternStringLength) / patternStringLength);
         Log.i("BillProcessor",Double.toString(similarity));
 
-        if (similarity >= simPercentage)
-            return true;
-        else
-            return false;
+        return  (similarity >= simPercentage);
     }
 
 
