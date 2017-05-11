@@ -7,7 +7,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnTouch;
+
 public class MainActivity extends AppCompatActivity {
+
+    @BindView(R.id.dummyTextView)
+    TextView dummyTextView;
 
     private Context appContext = this;
 
@@ -15,33 +22,16 @@ public class MainActivity extends AppCompatActivity {
     private DbHandler dbHandler;
     BillsAdapter billsAdapter;
 
-    private TextView dummyTextView;
-
-    private final View.OnTouchListener scanButtonListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                dummyTextView.setText("click!");
-
-                billFactory.createNewBill();
-            }
-            return false;
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ButterKnife.bind(this);
 
         billFactory = new BillFactory(appContext, dbHandler);
         dbHandler = new DbHandler(this);
         billsAdapter = new BillsAdapter(dbHandler);
         dbHandler.openDb();
-
-        dummyTextView = (TextView)findViewById(R.id.dummyTextView);
-
-        findViewById(R.id.scanButton).setOnTouchListener(scanButtonListener);
     }
 
     @Override
@@ -56,5 +46,15 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         dbHandler.closeDb();
+    }
+
+    @OnTouch(R.id.scanButton)
+    public boolean onScanButtonTouch(View view, MotionEvent motionEvent) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            dummyTextView.setText("click!");
+
+            billFactory.createNewBill();
+        }
+        return false;
     }
 }
