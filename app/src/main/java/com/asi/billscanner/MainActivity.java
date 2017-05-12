@@ -4,7 +4,6 @@ import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
-import android.view.View;
 import android.widget.TextView;
 
 import butterknife.BindView;
@@ -13,8 +12,7 @@ import butterknife.OnTouch;
 
 public class MainActivity extends AppCompatActivity {
 
-    @BindView(R.id.dummyTextView)
-    TextView dummyTextView;
+    @BindView(R.id.dummyTextView) TextView dummyTextView;
 
     private Context appContext = this;
 
@@ -49,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnTouch(R.id.scanButton)
-    public boolean onScanButtonTouch(View view, MotionEvent motionEvent) {
+    public boolean onScanButtonTouch(MotionEvent motionEvent) {
         if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
             dummyTextView.setText("click!");
 

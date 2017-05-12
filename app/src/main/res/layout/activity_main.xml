@@ -12,9 +12,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello world!"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="29dp"
-        android:layout_alignParentTop="true"
+        android:layout_marginStart="23dp"
+        android:layout_marginTop="31dp"
         android:layout_alignParentStart="true" />
 
     <Button
