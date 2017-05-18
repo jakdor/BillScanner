@@ -2,7 +2,10 @@ package com.asi.billscanner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
+
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Wytyczne:
@@ -17,6 +20,25 @@ class BillFactory {
     private static Context appContext;
     private DbHandler dbHandler;
 
+    private class ProcessBill extends AsyncTask<String, Void, Void>{
+        Bill bill;
+
+        @Override
+        protected Void doInBackground(String... params) {
+            BillProcessor billProcessor = new BillProcessor(params[0]);
+            billProcessor.run();
+            //rest of the bill processing here
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            EventBus.getDefault().postSticky(new BillAcceptanceActivity.getBillForAcceptance(bill));
+        }
+    }
+
     BillFactory(Context appContext, DbHandler dbHandler){
         BillFactory.appContext = appContext;
         this.dbHandler = dbHandler;
@@ -26,17 +48,12 @@ class BillFactory {
         lunchOCRCapture();
     }
 
-    private static void runOcrProcessing(String ocrResult){
+    private void runOcrProcessing(String ocrResult){
+        new ProcessBill().execute(ocrResult);
         lunchBillAcceptanceActivity();
-        //BillProcessor billProcessor = new BillProcessor(ocrResult);
-        //billProcessor.run();
-        //Bill bill = billProcessor.getResult();
-        //                  lub inne metody zwracające billa
-
-        //BillAcceptanceActivity.setBill(bill);
     }
 
-    static void setOcrResult(String input){
+    void setOcrResult(String input){
         if(!input.isEmpty()) {
             Log.i("BillFactory", "Got ocr result");
             runOcrProcessing(input);
@@ -45,12 +62,12 @@ class BillFactory {
 
     private void lunchOCRCapture(){
         Intent OCRCaptureIntent = new Intent(appContext, OCRCaptureActivity.class);
+        OCRCaptureIntent.setFlags(Intent.FLAG_ACTIVITY_PREVIOUS_IS_TOP);
         appContext.startActivity(OCRCaptureIntent);
     }
 
-    private static void lunchBillAcceptanceActivity(){
+    private void lunchBillAcceptanceActivity(){
         Intent billAcceptanceIntent = new Intent(appContext, BillAcceptanceActivity.class);
         appContext.startActivity(billAcceptanceIntent);
     }
-
 }

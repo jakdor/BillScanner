@@ -21,7 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity">
+        </activity>
         <activity
             android:name=".OCRCaptureActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -35,10 +36,10 @@
         </activity>
         <activity
             android:name=".BillAcceptanceActivity"
-            android:label="@string/title_activity_bill_acceptance"></activity>
-        <activity
-            android:name=".test"
-            android:label="@string/title_activity_test"></activity>
+            android:label="@string/title_activity_bill_acceptance"
+            android:noHistory="true">
+        </activity>
+
     </application>
 
 </manifest>

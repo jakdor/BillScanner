@@ -3,8 +3,12 @@ package com.asi.billscanner;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.TextView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -13,6 +17,8 @@ import butterknife.OnTouch;
 public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.dummyTextView) TextView dummyTextView;
+
+    private final String CLASS_TAG = "MainActivity";
 
     private Context appContext = this;
 
@@ -33,16 +39,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        if(!dbHandler.isDbOpen()) {
-            dbHandler.openDb();
-        }
+    protected void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.i(CLASS_TAG, "onDestroy called");
         dbHandler.closeDb();
     }
 
@@ -54,5 +65,26 @@ public class MainActivity extends AppCompatActivity {
             billFactory.createNewBill();
         }
         return false;
+    }
+
+    @Subscribe(sticky = true)
+    public void onOcrReturnEvent(getOcrStringEvent event) {
+        if(!event.getOcrStr().isEmpty()) {
+            Log.i(CLASS_TAG, "getOcrStringEvent called");
+            billFactory.setOcrResult(event.getOcrStr());
+        }
+        EventBus.getDefault().removeStickyEvent(event);
+    }
+
+    static class getOcrStringEvent {
+        private final String str;
+
+        getOcrStringEvent(String str) {
+            this.str = str;
+        }
+
+        String getOcrStr() {
+            return str;
+        }
     }
 }

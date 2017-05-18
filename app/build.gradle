@@ -48,4 +48,5 @@ dependencies {
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
 }
