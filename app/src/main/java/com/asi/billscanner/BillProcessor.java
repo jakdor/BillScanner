@@ -40,7 +40,7 @@ class BillProcessor {
         for (int i = 0; i < ocrString.length(); i++) {
             if (ocrString.charAt(i) == '\n') {
 
-                line = ocrString.substring(begin, i - 1);
+                line = ocrString.substring(begin, i - 1); //Exception here
 
                 if(bill.getCompany().equals("")) {
                     bill.setCompany(searchCompany(line,begin,begin));
@@ -136,7 +136,7 @@ class BillProcessor {
                 break;
         }
 
-        return Double.parseDouble(string.substring(subStringBegin[0], subStringEnd[0]));
+        return Double.parseDouble(string.substring(subStringBegin[0], subStringEnd[0])); //Exception here
     }
 
     private String searchWord(String string, int[] subStringBegin, int[] subStringEnd) {

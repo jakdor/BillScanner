@@ -27,7 +27,7 @@ class BillFactory {
         protected Void doInBackground(String... params) {
             BillProcessor billProcessor = new BillProcessor(params[0]);
             billProcessor.run();
-            //rest of the bill processing here
+            bill = billProcessor.getBill();
 
             return null;
         }
