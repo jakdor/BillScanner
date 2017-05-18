@@ -37,6 +37,8 @@ import com.asi.billscanner.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.io.IOException;
 import java.util.Locale;
 
@@ -91,7 +93,8 @@ public final class OCRCaptureActivity extends AppCompatActivity {
             } else {
                 frameFlash.startAnimation(fade);
                 Log.i("OCRCaptureActivity", "SnapShot: " + ocrStr);
-                BillFactory.setOcrResult(ocrStr);
+
+                EventBus.getDefault().postSticky(new MainActivity.getOcrStringEvent(ocrStr));
                 finish();
             }
         }
