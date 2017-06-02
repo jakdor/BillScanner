@@ -19,12 +19,19 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.os.Build;
+import android.os.Handler;
 import android.os.SystemClock;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicYuvToRGB;
+import android.renderscript.Type;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresPermission;
 import android.support.annotation.StringDef;
@@ -47,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 // Note: This requires Google Play Services 8.1 or higher, due to using indirect byte buffers for
 // storing images.
@@ -356,6 +364,9 @@ public class CameraSource {
             mFrameProcessor.setActive(true);
             mProcessingThread.start();
         }
+
+        timerHandler.postDelayed(timerRunnable, 0);
+
         return this;
     }
 
@@ -381,6 +392,9 @@ public class CameraSource {
             mFrameProcessor.setActive(true);
             mProcessingThread.start();
         }
+
+        timerHandler.postDelayed(timerRunnable, 0);
+
         return this;
     }
 
@@ -1057,6 +1071,22 @@ public class CameraSource {
     // Frame processing
     //==============================================================================================
 
+    private Bitmap bitmap;
+    private boolean captureFlag = false;
+
+    public Bitmap getImageView(){
+        return bitmap;
+    }
+
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable = new Runnable() {
+        @Override
+        public void run() {
+            captureFlag = true;
+            timerHandler.postDelayed(this, 500);
+        }
+    };
+
     /**
      * Called when the camera has a new preview frame.
      */
@@ -1064,6 +1094,35 @@ public class CameraSource {
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
             mFrameProcessor.setNextFrame(data, camera);
+
+            if(captureFlag) {
+                bitmap = Bitmap.createBitmap(mPreviewSize.getWidth(), mPreviewSize.getHeight(), Bitmap.Config.ARGB_8888);
+                Allocation bmData = renderScriptNV21ToRGBA888(
+                        mContext,
+                        mPreviewSize.getWidth(),
+                        mPreviewSize.getHeight(),
+                        data);
+                bmData.copyTo(bitmap);
+
+                captureFlag = false;
+            }
+        }
+
+        private Allocation renderScriptNV21ToRGBA888(Context context, int width, int height, byte[] nv21) {
+            RenderScript rs = RenderScript.create(context);
+            ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+
+            Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(nv21.length);
+            Allocation in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+
+            Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(width).setY(height);
+            Allocation out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
+
+            in.copyFrom(nv21);
+
+            yuvToRgbIntrinsic.setInput(in);
+            yuvToRgbIntrinsic.forEach(out);
+            return out;
         }
     }
 

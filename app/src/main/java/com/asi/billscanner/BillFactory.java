@@ -35,7 +35,7 @@ class BillFactory {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            EventBus.getDefault().postSticky(new BillAcceptanceActivity.getBillForAcceptance(bill));
+            EventBus.getDefault().postSticky(new BillAcceptanceActivity.GetBillForAcceptance(bill));
         }
     }
 

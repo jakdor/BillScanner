@@ -94,7 +94,12 @@ public final class OCRCaptureActivity extends AppCompatActivity {
                 frameFlash.startAnimation(fade);
                 Log.i("OCRCaptureActivity", "SnapShot: " + ocrStr);
 
+                //post ocrStr
                 EventBus.getDefault().postSticky(new MainActivity.getOcrStringEvent(ocrStr));
+
+                //post preview bitmap
+                EventBus.getDefault().postSticky(new BillAcceptanceActivity.GetBitmap(mCameraSource.getImageView()));
+
                 finish();
             }
         }
