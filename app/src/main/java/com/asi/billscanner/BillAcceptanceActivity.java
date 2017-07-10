@@ -53,8 +53,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-        byte[] byteArray = stream.toByteArray();
-        return byteArray;
+        return stream.toByteArray();
     }
 
     private Bitmap rotateBitmap(Bitmap toTransform, float angle){

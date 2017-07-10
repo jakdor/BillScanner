@@ -42,6 +42,9 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.IOException;
 import java.util.Locale;
 
+import butterknife.ButterKnife;
+import butterknife.OnTouch;
+
 public final class OCRCaptureActivity extends AppCompatActivity {
     private static final String TAG = "OcrCaptureActivity";
 
@@ -69,16 +72,14 @@ public final class OCRCaptureActivity extends AppCompatActivity {
     /**
      * floatingActionTakePhoto listener
      */
-    private final View.OnTouchListener takePhotoButtonListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                Log.i("OCRCaptureActivity", "CLICK!");
-                ocrEnd();
-            }
-            return false;
+    @OnTouch(R.id.floatingActionTakePhoto)
+    public boolean onTakePhotoTouch(MotionEvent motionEvent) {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+            Log.i("OCRCaptureActivity", "CLICK!");
+            ocrEnd();
         }
-    };
+        return false;
+    }
 
     /**
      * lunches after user decided to take snapshot, checks if ocr was successful
@@ -145,6 +146,7 @@ public final class OCRCaptureActivity extends AppCompatActivity {
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
         setContentView(R.layout.activity_ocrcapture);
+        ButterKnife.bind(this);
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<OCRGraphic>) findViewById(R.id.graphicOverlay);
@@ -169,8 +171,6 @@ public final class OCRCaptureActivity extends AppCompatActivity {
                 Snackbar.LENGTH_LONG)
                 .show();
 
-        FloatingActionButton fab1 = (FloatingActionButton) findViewById(R.id.floatingActionTakePhoto);
-        fab1.setOnTouchListener(takePhotoButtonListener);
 
         flashAnimationSetup();
     }
