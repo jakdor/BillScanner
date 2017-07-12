@@ -158,6 +158,18 @@ class Bill {
         return sum;
     }
 
+    int getDateYear(){
+        return Integer.parseInt(date.substring(0, 4));
+    }
+
+    int getDateMonth(){
+        return Integer.parseInt(date.substring(5, 7));
+    }
+
+    int getDateDay(){
+        return Integer.parseInt(date.substring(8, 10));
+    }
+
     String getDate() {
         return date;
     }

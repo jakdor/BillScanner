@@ -17,7 +17,7 @@ public class BillTest {
     private Bill bill;
 
     private final String DUMMY_COMPANY = "Biedra";
-    private final String DUMMY_DATE = "2017-02-01";
+    private final String DUMMY_DATE = "2017-02-11";
     private final String DUMMY_ADDRESS = "12 Baker st. 23543 London";
 
     private final String DUMMY_NAME = "Ser";
@@ -166,6 +166,21 @@ public class BillTest {
         String actualDate = bill.getDate();
 
         assertEquals(DUMMY_DATE, actualDate);
+    }
+
+    @Test
+    public void getDateYear() throws Exception {
+        assertEquals(2017, bill.getDateYear());
+    }
+
+    @Test
+    public void getDateMonth() throws Exception {
+        assertEquals(2, bill.getDateMonth());
+    }
+
+    @Test
+    public void getDateDay() throws Exception {
+        assertEquals(11, bill.getDateDay());
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.asi.billscanner;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -7,7 +8,11 @@ import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
@@ -15,6 +20,13 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Wytyczne:
@@ -25,19 +37,53 @@ import java.io.ByteArrayOutputStream;
 
 public class BillAcceptanceActivity extends AppCompatActivity {
 
+    @BindView(R.id.cardDateField) EditText cardDateEditText;
+    @BindView(R.id.cardSumField) TextView cardSumTextView;
+    @BindView(R.id.cardCompanyField) EditText cardCompanyEditText;
+    @BindView(R.id.cardAddressField) EditText cardAddressEditText;
+
     private final String CLASS_TAG = "BillAcceptanceActivity";
 
     private Bill bill;
     private Bitmap billBitmap;
+    private Calendar calendar;
+
+    private CollapsingToolbarLayout collapsingToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill_acceptance);
+        ButterKnife.bind(this);
 
-        CollapsingToolbarLayout collapsingToolbar =
-                (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        collapsingToolbar.setTitle("hello");
+        calendar = Calendar.getInstance();
+
+        collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+
+        waitForBill();
+    }
+
+    private void waitForBill(){
+        collapsingToolbar.setTitle(getString(R.string.bill_loading));
+    }
+
+    private void loadBill(){
+        String sum = String.format(Locale.getDefault() ,"%.2f", bill.getBillSum()) + " zł";
+        collapsingToolbar.setTitle(sum);
+        cardDateEditText.setText(bill.getDate());
+        cardSumTextView.setText(sum);
+        cardCompanyEditText.setText(bill.getCompany());
+        cardAddressEditText.setText(bill.getAddress());
+        calendar.set(bill.getDateYear(), bill.getDateMonth(), bill.getDateDay());
+    }
+
+    @OnClick(R.id.fabAccept)
+    public void fabAcceptOnClick(View view){
+        updateAcceptedBill();
+    }
+
+    private void updateAcceptedBill(){
+
     }
 
     private void loadBackdrop() {
@@ -52,6 +98,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     private byte[] bitmapToByte(Bitmap bitmap){
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.setHeight(800);
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
         return stream.toByteArray();
     }
@@ -61,6 +108,32 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         matrix.postRotate(angle);
         return Bitmap.createBitmap(toTransform, 0, 0,
                 toTransform.getWidth(), toTransform.getHeight(), matrix, true);
+    }
+
+    DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
+
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear,
+                              int dayOfMonth) {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, monthOfYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateDateField();
+        }
+
+    };
+
+    @OnClick(R.id.cardDateField)
+    public void cardDateFieldOnClick(View view) {
+        new DatePickerDialog(this, date, calendar
+                .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)).show();
+    }
+
+    private void updateDateField(){
+        String format = "yyyy-MM-dd";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.getDefault());
+        cardDateEditText.setText(simpleDateFormat.format(calendar.getTime()));
     }
 
     @Override
@@ -79,9 +152,18 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        cancelBill();
+    }
+
+    private void cancelBill(){
         Intent intent = new Intent(BillAcceptanceActivity.this, OCRCaptureActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
+    }
+
+    @OnClick(R.id.fabCancel)
+    public void fabCancelOnClick(View view){
+        cancelBill();
     }
 
     @Subscribe(sticky = true)
@@ -92,7 +174,9 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         }
         else {
             Log.wtf(CLASS_TAG, "onGetBillEvent; Bill not initialized");
+            this.bill = spawnDummyTestBill(); //BillProcessor not working yet
         }
+        loadBill();
         EventBus.getDefault().removeStickyEvent(event);
     }
 
@@ -130,5 +214,13 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         Bitmap getBitmap() {
             return bitmap;
         }
+    }
+
+    private Bill spawnDummyTestBill(){
+        Bill bill = new Bill("2017-06-30", "ZZ TOP S.C.", "K.Wielkiego 25/1A");
+        bill.addNewProduct("ABBA", "", 1.0, 10.5);
+        bill.addNewProduct("Pudelko", "", 1.0, 0.5);
+        bill.addNewProduct("zupa kremowa", "", 1.0, 6.5);
+        return bill;
     }
 }

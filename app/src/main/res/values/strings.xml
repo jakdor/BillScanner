@@ -17,10 +17,17 @@
     <string name="auto_focus">Auto Focus</string>
     <string name="use_flash">Włącz latarkę</string>
     <string name="ocr_success">Odczytano tekst</string>
-    <string name="ocr_failure">Nie wykryto textu</string>
+    <string name="ocr_failure">Nie wykryto tekstu</string>
 
+    <string name="bill_loading">trwa przetwaraznie&#8230;</string>
     <string name="title_activity_test">test</string>
     <string name="title_home">Podsumowania</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+
+
+    <string name="backdrop_info">Scanned bill</string>
+    <string name="Card1Header">Data</string>
+    <string name="Card2Header">Suma</string>
+
 </resources>

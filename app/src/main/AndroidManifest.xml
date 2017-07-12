@@ -40,7 +40,8 @@
         <activity
             android:name=".BillAcceptanceActivity"
             android:label="@string/title_activity_bill_acceptance"
-            android:noHistory="true">
+            android:noHistory="true"
+            android:screenOrientation="portrait">
         </activity>
 
     </application>
