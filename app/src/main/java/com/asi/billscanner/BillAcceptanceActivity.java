@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -22,6 +23,7 @@ import org.greenrobot.eventbus.Subscribe;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import butterknife.BindView;
@@ -56,7 +58,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bill_acceptance);
         ButterKnife.bind(this);
 
-        calendar = Calendar.getInstance();
+        calendar = new GregorianCalendar();
 
         collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
 
@@ -74,7 +76,16 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         cardSumTextView.setText(sum);
         cardCompanyEditText.setText(bill.getCompany());
         cardAddressEditText.setText(bill.getAddress());
-        calendar.set(bill.getDateYear(), bill.getDateMonth(), bill.getDateDay());
+
+        loadProductsList();
+    }
+
+    private void loadProductsList(){
+        LinearLayout layout = (LinearLayout) findViewById(R.id.productsLayout);
+        View child = getLayoutInflater().inflate(R.layout.bill_acceptance_card, layout);
+        View child2 = getLayoutInflater().inflate(R.layout.bill_acceptance_card, layout);
+        layout.addView(child);
+        layout.addView(child2);
     }
 
     @OnClick(R.id.fabAccept)
@@ -125,15 +136,20 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     @OnClick(R.id.cardDateField)
     public void cardDateFieldOnClick(View view) {
-        new DatePickerDialog(this, date, calendar
-                .get(Calendar.YEAR), calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)).show();
+
+        new DatePickerDialog(this, date,
+                bill.getDateYear() ,
+                bill.getDateMonth() - 1,
+                bill.getDateDay())
+                .show();
     }
 
     private void updateDateField(){
         String format = "yyyy-MM-dd";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format, Locale.getDefault());
-        cardDateEditText.setText(simpleDateFormat.format(calendar.getTime()));
+        String newDate = simpleDateFormat.format(calendar.getTime());
+        bill.setDate(newDate);
+        cardDateEditText.setText(newDate);
     }
 
     @Override

@@ -27,7 +27,9 @@
 
 
     <string name="backdrop_info">Scanned bill</string>
-    <string name="Card1Header">Data</string>
-    <string name="Card2Header">Suma</string>
+    <string name="cardDateHeader">Data</string>
+    <string name="cardSumHeader">Suma</string>
+    <string name="cardCompanyHeader">Firma</string>
+    <string name="cardAddressHeader">Adres</string>
 
 </resources>

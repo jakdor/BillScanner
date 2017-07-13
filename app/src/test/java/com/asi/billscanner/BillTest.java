@@ -17,7 +17,7 @@ public class BillTest {
     private Bill bill;
 
     private final String DUMMY_COMPANY = "Biedra";
-    private final String DUMMY_DATE = "2017-02-11";
+    private final String DUMMY_DATE = "2017-01-11";
     private final String DUMMY_ADDRESS = "12 Baker st. 23543 London";
 
     private final String DUMMY_NAME = "Ser";
@@ -175,7 +175,7 @@ public class BillTest {
 
     @Test
     public void getDateMonth() throws Exception {
-        assertEquals(2, bill.getDateMonth());
+        assertEquals(1, bill.getDateMonth());
     }
 
     @Test
