@@ -24,11 +24,14 @@ import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
+import java.util.Vector;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.OnTextChanged;
 
 /**
  * Wytyczne:
@@ -49,6 +52,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     private Bill bill;
     private Bitmap billBitmap;
     private Calendar calendar;
+    private Vector<View> productView;
 
     private CollapsingToolbarLayout collapsingToolbar;
 
@@ -59,6 +63,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         calendar = new GregorianCalendar();
+        productView = new Vector<>();
 
         collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
 
@@ -70,7 +75,8 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     }
 
     private void loadBill(){
-        String sum = String.format(Locale.getDefault() ,"%.2f", bill.getBillSum()) + " zł";
+        String sum = String.format(Locale.getDefault() ,"%.2f", bill.getBillSum()) +
+                " " + getString(R.string.currency);
         collapsingToolbar.setTitle(sum);
         cardDateEditText.setText(bill.getDate());
         cardSumTextView.setText(sum);
@@ -82,10 +88,26 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     private void loadProductsList(){
         LinearLayout layout = (LinearLayout) findViewById(R.id.productsLayout);
-        View child = getLayoutInflater().inflate(R.layout.bill_acceptance_card, layout);
-        View child2 = getLayoutInflater().inflate(R.layout.bill_acceptance_card, layout);
-        layout.addView(child);
-        layout.addView(child2);
+
+        List<Bill.Product> productList = bill.getProductList();
+        for(Bill.Product product : productList){
+            View view = getLayoutInflater().
+                    inflate(R.layout.bill_acceptance_card, layout, false);
+            productView.addElement(view);
+
+            TextView cardLabel = (TextView) view.findViewById(R.id.productCardId);
+            cardLabel.setText(String.format(Locale.getDefault(), "produkt %d",
+                    productList.indexOf(product) + 1));
+            EditText productName = (EditText) view.findViewById(R.id.productCardName);
+            productName.setText(product.name);
+            EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
+            productAmount.setText(String.format(Locale.getDefault(), "%.3f", product.amount));
+            EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
+            productPrice.setText(String.format(Locale.getDefault(),"%.2f " +
+                    getString(R.string.currency), product.price));
+            
+            layout.addView(view);
+        }
     }
 
     @OnClick(R.id.fabAccept)

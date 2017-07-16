@@ -25,11 +25,17 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
 
+    <string name="currency">zł</string>
 
     <string name="backdrop_info">Scanned bill</string>
     <string name="cardDateHeader">Data</string>
     <string name="cardSumHeader">Suma</string>
     <string name="cardCompanyHeader">Firma</string>
     <string name="cardAddressHeader">Adres</string>
+    <string name="productCardLabel1">nazwa:</string>
+    <string name="productCardLabel2">ilość:</string>
+    <string name="productCardLabel3">cena:</string>
+    <string name="productCardLabel4">Kategoria: </string>
+    <string name="productCardButton1">Edytuj</string>
 
 </resources>

@@ -10,7 +10,7 @@
             android:id="@+id/productCardId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="9dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:text="Produkt 1" />
@@ -27,7 +27,7 @@
                 android:layout_marginTop="14dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="15dp"
-                android:text="nazwa:" />
+                android:text="@string/productCardLabel1" />
 
             <EditText
                 android:id="@+id/productCardName"
@@ -62,13 +62,13 @@
                         android:layout_marginTop="14dp"
                         android:layout_marginStart="16dp"
                         android:layout_marginEnd="15dp"
-                        android:text="ilość:" />
+                        android:text="@string/productCardLabel2" />
 
                     <EditText
                         android:id="@+id/productCardAmount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="17dp"
+                        android:layout_marginStart="16.5dp"
                         android:layout_marginEnd="5dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title"
                         android:inputType="numberDecimal" />
@@ -93,7 +93,7 @@
                         android:layout_marginTop="14dp"
                         android:layout_marginStart="5dp"
                         android:layout_marginEnd="5dp"
-                        android:text="cena:" />
+                        android:text="@string/productCardLabel3" />
 
                     <EditText
                         android:id="@+id/productCardPrice"
@@ -102,12 +102,56 @@
                         android:layout_marginStart="5dp"
                         android:layout_marginEnd="16dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                        android:inputType="numberDecimal"/>
+                        android:inputType="numberDecimal"
+                        android:digits="0123456789.,"/>
 
                 </LinearLayout>
 
             </RelativeLayout>
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="12dp"
+                android:text="@string/productCardLabel4" />
+
+            <RelativeLayout
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+                <Spinner
+                    android:id="@+id/spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"/>
+
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+
+            <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="15dp"
+            android:text="@string/productCardButton1" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 
@@ -116,6 +160,5 @@
             android:layout_height="2px"
             android:layout_marginTop="3dp"
             android:background="?android:attr/listDivider" />
-
-    </LinearLayout>
+</LinearLayout>
 
