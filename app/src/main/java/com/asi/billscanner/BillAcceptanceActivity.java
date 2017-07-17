@@ -1,18 +1,24 @@
 package com.asi.billscanner;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -31,7 +37,6 @@ import java.util.Vector;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import butterknife.OnTextChanged;
 
 /**
  * Wytyczne:
@@ -49,6 +54,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     private final String CLASS_TAG = "BillAcceptanceActivity";
 
+    private Context activityContext;
     private Bill bill;
     private Bitmap billBitmap;
     private Calendar calendar;
@@ -62,6 +68,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bill_acceptance);
         ButterKnife.bind(this);
 
+        activityContext = this;
         calendar = new GregorianCalendar();
         productView = new Vector<>();
 
@@ -100,14 +107,86 @@ public class BillAcceptanceActivity extends AppCompatActivity {
                     productList.indexOf(product) + 1));
             EditText productName = (EditText) view.findViewById(R.id.productCardName);
             productName.setText(product.name);
-            EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
+            final EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
             productAmount.setText(String.format(Locale.getDefault(), "%.3f", product.amount));
-            EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
+            final EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
             productPrice.setText(String.format(Locale.getDefault(),"%.2f " +
                     getString(R.string.currency), product.price));
-            
+
+            productAmount.addTextChangedListener(correctDot(productAmount));
+            productPrice.addTextChangedListener(correctDot(productPrice));
+
+            productPrice.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View v, boolean hasFocus) {
+                    if(hasFocus){
+                        if(productPrice.getText().toString().contains("zł")){
+                            String noCurrency = productPrice.getText().toString().replace("zł", "");
+                            noCurrency = noCurrency.replace(" ", "");
+                            productPrice.setText(noCurrency);
+                        }
+                    }
+                    else {
+                        productPrice.setText(productPrice.getText().toString() +
+                                " " + getString(R.string.currency));
+                    }
+                }
+            });
+
+            ImageButton deleteProductButton = (ImageButton) view.findViewById(R.id.deleteProductButton);
+            deleteProductButton.setOnClickListener(removeProduct(view, layout));
+
+            Button editCategoriesButton = (Button) view.findViewById(R.id.categoriesEditButton);
+            editCategoriesButton.setOnClickListener(new View.OnClickListener(){
+                public void onClick (View v){
+                    editCategories();
+                }
+            });
+
+            Spinner productCategory = (Spinner) view.findViewById(R.id.productCardCategorySpinner);
+
             layout.addView(view);
         }
+    }
+
+    View.OnClickListener removeProduct(final View view, final LinearLayout layout){
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                layout.removeView(view);
+                productView.remove(view);
+            }
+        };
+    }
+
+    TextWatcher correctDot(final EditText editText){
+        return new TextWatcher() {
+            boolean isChanging = false;
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (isChanging) {
+                    return;
+                }
+
+                isChanging = true;
+
+                editText.setText(editText.getText().toString().replace('.', ','));
+                editText.setSelection(editText.length());
+
+                isChanging = false;
+            }
+        };
+    }
+
+    private void editCategories(){
+
     }
 
     @OnClick(R.id.fabAccept)

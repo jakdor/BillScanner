@@ -28,6 +28,7 @@
     <string name="currency">zł</string>
 
     <string name="backdrop_info">Scanned bill</string>
+    <string name="delete_product_button">delete product button</string>
     <string name="cardDateHeader">Data</string>
     <string name="cardSumHeader">Suma</string>
     <string name="cardCompanyHeader">Firma</string>
