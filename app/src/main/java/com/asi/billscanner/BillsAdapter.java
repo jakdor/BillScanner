@@ -218,6 +218,9 @@ class BillsAdapter {
         return sum;
     }
 
+    /**
+     * gets all categories from db
+     */
     Vector<String> getUsedCategories(){
         Vector<String> categories = new Vector<>();
 
@@ -268,6 +271,47 @@ class BillsAdapter {
         if(!dbHandler.deleteProductsByBillId(billId)){
             Log.wtf(CLASS_TAG, "failed to delete all products linked to given bill");
             throw new RuntimeException(CLASS_TAG + ": failed to delete all products linked to given bill");
+        }
+    }
+
+    /**
+     * gets all categories discarded by user
+     */
+    Vector<String> getDiscardedCategories(){
+        Vector<String> categories = new Vector<>();
+
+        Cursor categoriesCursor = dbHandler.getDiscardedCategories();
+        if(categoriesCursor == null){
+            Log.wtf(CLASS_TAG, "db query returned null");
+            throw new RuntimeException(CLASS_TAG + ": db query returned null");
+        }
+
+        categoriesCursor.moveToFirst();
+        for(int i = 0; i < categoriesCursor.getCount(); ++i){
+            categories.add(categoriesCursor.getString(0));
+            categoriesCursor.moveToNext();
+        }
+
+        return categories;
+    }
+
+    /**
+     * delete discarded category by name
+     */
+    void deleteDiscardedCategory(String category){
+        if(!dbHandler.deleteDiscardedCategory(category)){
+            Log.wtf(CLASS_TAG, "failed to delete discarded category from db");
+            throw new RuntimeException(CLASS_TAG + ": failed to delete discarded category from db");
+        }
+    }
+
+    /**
+     * add discarded category to db
+     */
+    void addDiscardedCategory(String category) {
+        if(dbHandler.insertDiscardedCategory(category) == -1){
+            Log.wtf(CLASS_TAG, "failed to insert discarded category into db");
+            throw new RuntimeException(CLASS_TAG + ": failed to insert discarded category into db");
         }
     }
 }

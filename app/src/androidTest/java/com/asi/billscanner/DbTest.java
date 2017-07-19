@@ -44,6 +44,9 @@ public class DbTest{
     private final double DUMMY_AMOUNT_2 = 1.0;
     private final double DUMMY_PRICE_2 = 13.99;
 
+    private final String DUMMY_DC_1 = "dupa";
+    private final String DUMMY_DC_2 = "Spożywcze 123";
+
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
@@ -68,6 +71,9 @@ public class DbTest{
         billsAdapter.addBillToDB(dummyBill);
         billsAdapter.addBillToDB(dummyBill2);
         billsAdapter.addBillToDB(dummyBill3);
+
+        billsAdapter.addDiscardedCategory(DUMMY_DC_1);
+        billsAdapter.addDiscardedCategory(DUMMY_DC_2);
     }
 
     @After
@@ -382,5 +388,34 @@ public class DbTest{
         assertEquals(0.0, billsAdapter.getSum(1, 2, 2017));
         double sum = billsAdapter.getSum(3, 2, 2017);
         assertEquals(DUMMY_AMOUNT_1 * DUMMY_PRICE_1 + DUMMY_AMOUNT_2 * DUMMY_PRICE_2, sum, DELTA);
+    }
+
+    @Test
+    public void getDiscardedCategories() throws Exception {
+        Vector<String> dcVector = billsAdapter.getDiscardedCategories();
+
+        assertEquals(2, dcVector.size());
+        assertEquals(DUMMY_DC_1, dcVector.elementAt(0));
+        assertEquals(DUMMY_DC_2, dcVector.elementAt(1));
+    }
+
+    @Test
+    public void deleteDiscardedCategory() throws Exception {
+        billsAdapter.deleteDiscardedCategory(DUMMY_DC_2);
+        Vector<String> dcVector = billsAdapter.getDiscardedCategories();
+
+        assertEquals(1, dcVector.size());
+        assertEquals(DUMMY_DC_1, dcVector.elementAt(0));
+    }
+
+    @Test
+    public void addDiscardedCategory() throws Exception {
+        billsAdapter.addDiscardedCategory("dania");
+        Vector<String> dcVector = billsAdapter.getDiscardedCategories();
+
+        assertEquals(3, dcVector.size());
+        assertEquals(DUMMY_DC_1, dcVector.elementAt(0));
+        assertEquals("dania", dcVector.elementAt(1));
+        assertEquals(DUMMY_DC_2, dcVector.elementAt(2));
     }
 }

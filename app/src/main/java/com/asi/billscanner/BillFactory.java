@@ -7,6 +7,8 @@ import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.util.Vector;
+
 /**
  * Wytyczne:
  * - Klasa odpala OCRCaptureActivity lub ManualCapture,
@@ -18,7 +20,7 @@ import org.greenrobot.eventbus.EventBus;
 class BillFactory {
 
     private static Context appContext;
-    private DbHandler dbHandler;
+    private BillsAdapter billsAdapter;
 
     private class ProcessBill extends AsyncTask<String, Void, Void>{
         Bill bill;
@@ -35,13 +37,14 @@ class BillFactory {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            EventBus.getDefault().postSticky(new BillAcceptanceActivity.GetBillForAcceptance(bill));
+            EventBus.getDefault().postSticky(
+                    new BillAcceptanceActivity.GetBillForAcceptance(bill, getCategories()));
         }
     }
 
     BillFactory(Context appContext, DbHandler dbHandler){
         BillFactory.appContext = appContext;
-        this.dbHandler = dbHandler;
+        billsAdapter = new BillsAdapter(dbHandler);
     }
 
     void createNewBill(){
@@ -58,6 +61,21 @@ class BillFactory {
             Log.i("BillFactory", "Got ocr result");
             runOcrProcessing(input);
         }
+    }
+
+    private Vector<String> getCategories(){
+        Vector<String> categories = billsAdapter.getUsedCategories();
+        Vector<String> discardedCategories = billsAdapter.getDiscardedCategories();
+        for(int i = 0; i < categories.size(); ++i){
+            for(int j = 0; j < discardedCategories.size(); ++j){
+                if(categories.elementAt(i).equals(discardedCategories.elementAt(j))){
+                    categories.remove(i);
+                    break;
+                }
+            }
+        }
+
+        return categories;
     }
 
     private void lunchOCRCapture(){

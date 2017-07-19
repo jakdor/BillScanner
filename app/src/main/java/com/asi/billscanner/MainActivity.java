@@ -32,9 +32,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        billFactory = new BillFactory(appContext, dbHandler);
         dbHandler = new DbHandler(this);
+        billFactory = new BillFactory(appContext, dbHandler);
         billsAdapter = new BillsAdapter(dbHandler);
+
         dbHandler.openDb();
     }
 

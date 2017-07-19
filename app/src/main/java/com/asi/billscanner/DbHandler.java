@@ -89,6 +89,17 @@ class DbHandler {
                     "FOREIGN KEY (" + PRODUCTS_BILL_ID + ") REFERENCES " + TABLE_BILLS + "(" + BILLS_ID + ")" +
                     ");";
 
+    static final String TABLE_DISCARDED_CATEGORIES = "discardedCategories";
+
+    static final String DC_ID = "_id";
+    static final String DC_CATEGORY = "category";
+
+    private static final String DB_CREATE_DISCARDED_CATEGORIES_TABLE =
+            "CREATE TABLE " + TABLE_DISCARDED_CATEGORIES + "(" +
+                    DC_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    DC_CATEGORY + " VARCHAR(64)" +
+                    ");";
+
     private SQLiteDatabase db;
     private DatabaseHelper dbHelper;
     private Context context;
@@ -107,6 +118,8 @@ class DbHandler {
             Log.i(CLASS_TAG, "Created " + TABLE_BILLS + " table ver." + DB_VERSION);
             db.execSQL(DB_CREATE_PRODUCTS_TABLE);
             Log.i(CLASS_TAG, "Created " + TABLE_PRODUCTS + " table ver." + DB_VERSION);
+            db.execSQL(DB_CREATE_DISCARDED_CATEGORIES_TABLE);
+            Log.i(CLASS_TAG, "Created " + TABLE_DISCARDED_CATEGORIES + " table ver." + DB_VERSION);
         }
 
         @Override
@@ -333,5 +346,27 @@ class DbHandler {
                 PRODUCTS_AMOUNT,
                 PRODUCTS_PRICE};
         return db.query(TABLE_PRODUCTS, columns, null, null, null, null, null);
+    }
+
+    /**
+     * operations on discardedCategories table
+     */
+    Cursor getDiscardedCategories(){
+        String[] columns = {DC_CATEGORY};
+        return db.query(TABLE_DISCARDED_CATEGORIES,
+                columns, null, null, columns[0], null, columns[0] + " DESC");
+    }
+
+    boolean deleteDiscardedCategory(String category){
+        String where = DC_CATEGORY + "='" + category + "'";
+        return db.delete(TABLE_DISCARDED_CATEGORIES, where, null) > 0;
+    }
+
+    long insertDiscardedCategory(String category){
+
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(DC_CATEGORY, category);
+
+        return db.insert(TABLE_DISCARDED_CATEGORIES, null, contentValues);
     }
 }

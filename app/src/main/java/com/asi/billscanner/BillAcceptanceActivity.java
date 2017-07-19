@@ -12,6 +12,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -28,6 +30,7 @@ import org.greenrobot.eventbus.Subscribe;
 
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -56,6 +59,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     private Context activityContext;
     private Bill bill;
+    private Vector<String> categories;
     private Bitmap billBitmap;
     private Calendar calendar;
     private Vector<View> productView;
@@ -143,7 +147,18 @@ public class BillAcceptanceActivity extends AppCompatActivity {
                 }
             });
 
-            Spinner productCategory = (Spinner) view.findViewById(R.id.productCardCategorySpinner);
+            final Spinner productCategorySpinner = (Spinner) view.findViewById(R.id.productCardCategorySpinner);
+            ArrayAdapter<String> adapter;
+            List<String> list;
+            list = new ArrayList<>();
+            list.add("-");
+            for(String category : categories){
+                list.add(category);
+            }
+            adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner, list);
+            adapter.setDropDownViewResource(R.layout.spinner_item);
+            productCategorySpinner.setAdapter(adapter);
+            productCategorySpinner.setSelection(0);
 
             layout.addView(view);
         }
@@ -285,34 +300,50 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     @Subscribe(sticky = true)
     public void onGetBillEvent(GetBillForAcceptance event) {
+        Log.i(CLASS_TAG, "onGetBillEvent called");
         if(event.getBill() != null) {
-            Log.i(CLASS_TAG, "onGetBillEvent called");
             this.bill = event.getBill();
         }
         else {
             Log.wtf(CLASS_TAG, "onGetBillEvent; Bill not initialized");
+
             this.bill = spawnDummyTestBill(); //BillProcessor not working yet
         }
+
+        if(event.getCategories() != null) {
+            this.categories = event.getCategories();
+        }
+        else {
+            Log.wtf(CLASS_TAG, "onGetBillEvent; categories Vector not initialized");
+        }
+
         loadBill();
+
         EventBus.getDefault().removeStickyEvent(event);
     }
 
     static class GetBillForAcceptance {
         private final Bill bill;
+        private final Vector<String> categories;
 
-        GetBillForAcceptance(Bill bill) {
+        GetBillForAcceptance(Bill bill, Vector<String> categories) {
             this.bill = bill;
+            this.categories = categories;
         }
 
         Bill getBill() {
             return bill;
         }
+
+        Vector<String> getCategories() {
+            return categories;
+        }
     }
 
     @Subscribe(sticky = true)
     public void onGetBitmapEvent(GetBitmap event) {
+        Log.i(CLASS_TAG, "onGetBitmapEvent called");
         if(event.getBitmap() != null) {
-            Log.i(CLASS_TAG, "onGetBitmapEvent called");
             this.billBitmap = event.getBitmap();
         }
         else {
