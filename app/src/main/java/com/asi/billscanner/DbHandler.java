@@ -11,8 +11,6 @@ import android.util.Log;
 import com.asi.billscanner.dbUtilities.BillsModel;
 import com.asi.billscanner.dbUtilities.ProductsModel;
 
-import java.sql.Date;
-import java.util.Calendar;
 
 /**
  * Wytyczne:

@@ -1,7 +1,6 @@
 package com.asi.billscanner;
 
 import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -10,11 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.method.DigitsKeyListener;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -23,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.asi.billscanner.ui.elements.CategoriesDialog;
 import com.bumptech.glide.Glide;
 
 import org.greenrobot.eventbus.EventBus;
@@ -57,7 +56,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     private final String CLASS_TAG = "BillAcceptanceActivity";
 
-    private Context activityContext;
+    private CategoriesDialog categoriesDialog;
     private Bill bill;
     private Vector<String> categories;
     private Bitmap billBitmap;
@@ -72,7 +71,9 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_bill_acceptance);
         ButterKnife.bind(this);
 
-        activityContext = this;
+        categoriesDialog = new CategoriesDialog(this);
+        categoriesDialog.build();
+
         calendar = new GregorianCalendar();
         productView = new Vector<>();
 
@@ -98,83 +99,99 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     }
 
     private void loadProductsList(){
-        LinearLayout layout = (LinearLayout) findViewById(R.id.productsLayout);
-
         List<Bill.Product> productList = bill.getProductList();
-        for(Bill.Product product : productList){
-            View view = getLayoutInflater().
-                    inflate(R.layout.bill_acceptance_card, layout, false);
-            productView.addElement(view);
 
-            TextView cardLabel = (TextView) view.findViewById(R.id.productCardId);
-            cardLabel.setText(String.format(Locale.getDefault(), "produkt %d",
-                    productList.indexOf(product) + 1));
+        for(Bill.Product product : productList){
+            View view = addProductView();
+
             EditText productName = (EditText) view.findViewById(R.id.productCardName);
             productName.setText(product.name);
-            final EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
-            productAmount.setText(String.format(Locale.getDefault(), "%.3f", product.amount));
-            final EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
+            EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
+            productAmount.setText(formatDouble(product.amount));
+            EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
             productPrice.setText(String.format(Locale.getDefault(),"%.2f " +
                     getString(R.string.currency), product.price));
 
-            productAmount.addTextChangedListener(correctDot(productAmount));
-            productPrice.addTextChangedListener(correctDot(productPrice));
-
-            productPrice.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                @Override
-                public void onFocusChange(View v, boolean hasFocus) {
-                    if(hasFocus){
-                        if(productPrice.getText().toString().contains("zł")){
-                            String noCurrency = productPrice.getText().toString().replace("zł", "");
-                            noCurrency = noCurrency.replace(" ", "");
-                            productPrice.setText(noCurrency);
-                        }
-                    }
-                    else {
-                        productPrice.setText(productPrice.getText().toString() +
-                                " " + getString(R.string.currency));
-                    }
-                }
-            });
-
-            ImageButton deleteProductButton = (ImageButton) view.findViewById(R.id.deleteProductButton);
-            deleteProductButton.setOnClickListener(removeProduct(view, layout));
-
-            Button editCategoriesButton = (Button) view.findViewById(R.id.categoriesEditButton);
-            editCategoriesButton.setOnClickListener(new View.OnClickListener(){
-                public void onClick (View v){
-                    editCategories();
-                }
-            });
-
-            final Spinner productCategorySpinner = (Spinner) view.findViewById(R.id.productCardCategorySpinner);
-            ArrayAdapter<String> adapter;
-            List<String> list;
-            list = new ArrayList<>();
-            list.add("-");
-            for(String category : categories){
-                list.add(category);
-            }
-            adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner, list);
-            adapter.setDropDownViewResource(R.layout.spinner_item);
-            productCategorySpinner.setAdapter(adapter);
-            productCategorySpinner.setSelection(0);
-
-            layout.addView(view);
         }
     }
 
-    View.OnClickListener removeProduct(final View view, final LinearLayout layout){
+    private View addProductView(){
+        LinearLayout layout = (LinearLayout) findViewById(R.id.productsLayout);
+
+        View view = getLayoutInflater().
+                inflate(R.layout.bill_acceptance_card, layout, false);
+        productView.addElement(view);
+
+        TextView cardLabel = (TextView) view.findViewById(R.id.productCardId);
+        cardLabel.setText(String.format(Locale.getDefault(), "produkt %d", productView.size()));
+
+        final EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
+        final EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
+
+        productAmount.addTextChangedListener(correctDot(productAmount));
+        productPrice.addTextChangedListener(correctDot(productPrice));
+
+        productAmount.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(!hasFocus){
+                    updateSum();
+                }
+            }
+        });
+
+        productPrice.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus){
+                    if(productPrice.getText().toString().contains("zł")){
+                        String noCurrency = productPrice.getText().toString().replace("zł", "");
+                        noCurrency = noCurrency.replace(" ", "");
+                        productPrice.setText(noCurrency);
+                    }
+                }
+                else {
+                    productPrice.setText(productPrice.getText().toString() +
+                            " " + getString(R.string.currency));
+
+                    updateSum();
+                }
+            }
+        });
+
+        ImageButton deleteProductButton = (ImageButton) view.findViewById(R.id.deleteProductButton);
+        deleteProductButton.setOnClickListener(removeProduct(view, layout));
+
+        final Spinner productCategorySpinner = (Spinner) view.findViewById(R.id.productCardCategorySpinner);
+        ArrayAdapter<String> adapter;
+        List<String> list;
+        list = new ArrayList<>();
+        list.add("-");
+        for(String category : categories){
+            list.add(category);
+        }
+        adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner, list);
+        adapter.setDropDownViewResource(R.layout.spinner_item);
+        productCategorySpinner.setAdapter(adapter);
+        productCategorySpinner.setSelection(0);
+
+        layout.addView(view);
+        return view;
+    }
+
+    private View.OnClickListener removeProduct(final View view, final LinearLayout layout){
         return new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 layout.removeView(view);
                 productView.remove(view);
+                updateSum();
+                updateCardsTitles();
             }
         };
     }
 
-    TextWatcher correctDot(final EditText editText){
+    private TextWatcher correctDot(final EditText editText){
         return new TextWatcher() {
             boolean isChanging = false;
 
@@ -186,22 +203,70 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                if(s.toString().contains(",")) {
+                    editText.setKeyListener(DigitsKeyListener.getInstance("0123456789"));
+                }
+                else {
+                    editText.setKeyListener(DigitsKeyListener.getInstance("0123456789" + ",."));
+                }
+
                 if (isChanging) {
                     return;
                 }
 
                 isChanging = true;
 
+                int selection = editText.getSelectionStart();
                 editText.setText(editText.getText().toString().replace('.', ','));
-                editText.setSelection(editText.length());
+                editText.setSelection(selection);
 
                 isChanging = false;
             }
         };
     }
 
+    private void updateSum(){
+        try {
+            double sum = 0.0;
+            for (View view : productView) {
+                EditText productAmount = (EditText) view.findViewById(R.id.productCardAmount);
+                EditText productPrice = (EditText) view.findViewById(R.id.productCardPrice);
+                sum += Double.parseDouble(productAmount.getText().toString().replace(',', '.')) *
+                        Double.parseDouble(productPrice.getText().toString()
+                                .replace(',', '.').replace("zł", ""));
+            }
+
+            String sumStr = String.format(Locale.getDefault(), "%.2f", sum) +
+                    " " + getString(R.string.currency);
+            collapsingToolbar.setTitle(sumStr);
+            cardSumTextView.setText(sumStr);
+        }
+        catch (Exception e){
+            Log.e(CLASS_TAG, "Invalid amount/price field");
+        }
+    }
+
+    private void updateCardsTitles(){
+        for (View view : productView) {
+            TextView cardLabel = (TextView) view.findViewById(R.id.productCardId);
+            cardLabel.setText(String.format(Locale.getDefault(),
+                    "produkt %d", productView.indexOf(view) + 1));
+        }
+    }
+
+    @OnClick(R.id.categoriesEditButton)
+    public void categoriesEditOnClick(View view){
+        editCategories();
+    }
+
     private void editCategories(){
 
+        categoriesDialog.show();
+    }
+
+    @OnClick(R.id.addProductButton)
+    public void addProductOnClick(View view){
+        addProductView();
     }
 
     @OnClick(R.id.fabAccept)
@@ -211,6 +276,11 @@ public class BillAcceptanceActivity extends AppCompatActivity {
 
     private void updateAcceptedBill(){
 
+    }
+
+    private String formatDouble(double num){
+        return (num == (int)num) ? String.format(Locale.getDefault(), "%d", (int)num) :
+                String.format(Locale.getDefault(), "%s", num);
     }
 
     private void loadBackdrop() {
@@ -368,7 +438,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         Bill bill = new Bill("2017-06-30", "ZZ TOP S.C.", "K.Wielkiego 25/1A");
         bill.addNewProduct("ABBA", "", 1.0, 10.5);
         bill.addNewProduct("Pudelko", "", 1.0, 0.5);
-        bill.addNewProduct("zupa kremowa", "", 1.0, 6.5);
+        bill.addNewProduct("zupa kremowa", "", 1.5, 6.5);
         return bill;
     }
 }

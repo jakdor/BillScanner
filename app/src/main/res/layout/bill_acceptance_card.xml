@@ -24,7 +24,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="9dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginEnd="16dp"
                 android:text="Produkt" />
 
@@ -53,7 +53,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginTop="14dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginEnd="15dp"
                 android:text="@string/productCardLabel1" />
 
@@ -90,7 +90,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_marginTop="14dp"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="15dp"
                         android:layout_marginEnd="15dp"
                         android:text="@string/productCardLabel2" />
 
@@ -145,45 +145,24 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginBottom="7dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginTop="7dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginEnd="12dp"
                 android:text="@string/productCardLabel4" />
 
-            <RelativeLayout
-                android:layout_width="40dp"
+            <Spinner
+                android:id="@+id/productCardCategorySpinner"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-                <Spinner
-                    android:id="@+id/productCardCategorySpinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:spinnerMode="dialog"/>
-
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1">
-
-            <Button
-            android:id="@+id/categoriesEditButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
+                android:layout_marginTop="7dp"
                 android:layout_marginEnd="15dp"
-            android:text="@string/productCardButton1" />
-
-            </RelativeLayout>
+                android:spinnerMode="dialog"/>
 
         </LinearLayout>
 

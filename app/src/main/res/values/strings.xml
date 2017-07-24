@@ -19,7 +19,7 @@
     <string name="ocr_success">Odczytano tekst</string>
     <string name="ocr_failure">Nie wykryto tekstu</string>
 
-    <string name="bill_loading">trwa przetwaraznie&#8230;</string>
+    <string name="bill_loading">trwa przetwarzanie&#8230;</string>
     <string name="title_activity_test">test</string>
     <string name="title_home">Podsumowania</string>
     <string name="title_dashboard">Dashboard</string>
@@ -37,6 +37,10 @@
     <string name="productCardLabel2">ilość:</string>
     <string name="productCardLabel3">cena:</string>
     <string name="productCardLabel4">Kategoria: </string>
-    <string name="productCardButton1">Edytuj</string>
+    <string name="productCardButton1">Edytuj kategorie</string>
+    <string name="productCardButton2">Dodaj produkt</string>
+
+    <string name="categories_dialog_title">Edytor kategorii</string>
+    <string name="categories_edit_dialog_button">Dodaj</string>
 
 </resources>

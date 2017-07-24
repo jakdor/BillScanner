@@ -59,7 +59,7 @@
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="2dp"
+                android:layout_marginBottom="7dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp">
 
@@ -73,75 +73,133 @@
 
             </android.support.v7.widget.CardView>
 
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:baselineAligned="false">
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <Button
+                            android:id="@+id/categoriesEditButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="5dp"
+                            android:text="@string/productCardButton1" />
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <Button
+                            android:id="@+id/addProductButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="5dp"
+                            android:layout_marginEnd="10dp"
+                            android:text="@string/productCardButton2" />
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </android.support.v7.widget.CardView>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <android.support.v7.widget.CardView
-                    android:layout_width="177dp"
+                <RelativeLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="5dp">
+                    android:layout_weight="1">
 
-                    <LinearLayout
-                        style="@style/Widget.CardContentTight"
+                    <android.support.v7.widget.CardView
                         android:layout_width="177dp"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginStart="10dp"
+                        android:layout_marginEnd="5dp">
 
-                        <TextView
-                            android:labelFor="@+id/cardDateField"
+                        <LinearLayout
+                            style="@style/Widget.CardContentTight"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/cardDateHeader" />
+                            android:layout_height="wrap_content">
 
-                        <EditText
-                            android:id="@+id/cardDateField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                            android:focusable="false"
-                            android:inputType="date"/>
+                            <TextView
+                                android:labelFor="@+id/cardDateField"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/cardDateHeader" />
 
-                    </LinearLayout>
-                </android.support.v7.widget.CardView>
+                            <EditText
+                                android:id="@+id/cardDateField"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Title"
+                                android:focusable="false"
+                                android:inputType="date"/>
 
-                <android.support.v7.widget.CardView
-                    android:layout_width="match_parent"
+                        </LinearLayout>
+                    </android.support.v7.widget.CardView>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginEnd="10dp">
+                    android:layout_weight="1">
 
-                    <LinearLayout
-                        style="@style/Widget.CardContent"
+                    <android.support.v7.widget.CardView
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginBottom="10dp"
+                        android:layout_marginStart="5dp"
+                        android:layout_marginEnd="10dp">
 
-                        <TextView
+                        <LinearLayout
+                            style="@style/Widget.CardContent"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="@string/cardSumHeader" />
+                            android:layout_height="wrap_content">
 
-                        <TextView
-                            android:id="@+id/cardSumField"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/cardSumHeader" />
 
-                    </LinearLayout>
-                </android.support.v7.widget.CardView>
+                            <TextView
+                                android:id="@+id/cardSumField"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+
+                        </LinearLayout>
+                    </android.support.v7.widget.CardView>
+                </RelativeLayout>
 
             </LinearLayout>
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="7dp"
+                android:layout_marginBottom="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp">
 

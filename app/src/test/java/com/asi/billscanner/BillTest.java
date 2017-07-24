@@ -148,7 +148,7 @@ public class BillTest {
 
         double actualPrice = bill.getBillSum();
 
-        assertEquals(DUMMY_PRICE + DUMMY_PRICE, actualPrice, DELTA);
+        assertEquals(DUMMY_AMOUNT * DUMMY_PRICE + DUMMY_AMOUNT * DUMMY_PRICE, actualPrice, DELTA);
     }
 
     @Test

@@ -143,7 +143,7 @@ class Bill {
     double getBillSum(){
         double sum = 0.0;
         for(int i = 0; i < productsSize; ++i){
-            sum += productsPrice.get(i);
+            sum += productsAmount.get(i) * productsPrice.get(i);
         }
         return sum;
     }
