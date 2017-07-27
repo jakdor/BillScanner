@@ -59,6 +59,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     private CategoriesDialog categoriesDialog;
     private Bill bill;
     private Vector<String> categories;
+    private ArrayAdapter<String> categoriesAdapter;
     private Bitmap billBitmap;
     private Calendar calendar;
     private Vector<View> productView;
@@ -70,9 +71,6 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bill_acceptance);
         ButterKnife.bind(this);
-
-        categoriesDialog = new CategoriesDialog(this);
-        categoriesDialog.build();
 
         calendar = new GregorianCalendar();
         productView = new Vector<>();
@@ -94,6 +92,9 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         cardSumTextView.setText(sum);
         cardCompanyEditText.setText(bill.getCompany());
         cardAddressEditText.setText(bill.getAddress());
+
+        loadSpinnerItems();
+        categoriesDialog = new CategoriesDialog(this, categoriesAdapter);
 
         loadProductsList();
     }
@@ -163,20 +164,23 @@ public class BillAcceptanceActivity extends AppCompatActivity {
         deleteProductButton.setOnClickListener(removeProduct(view, layout));
 
         final Spinner productCategorySpinner = (Spinner) view.findViewById(R.id.productCardCategorySpinner);
-        ArrayAdapter<String> adapter;
+
+        productCategorySpinner.setAdapter(categoriesAdapter);
+        productCategorySpinner.setSelection(0);
+
+        layout.addView(view);
+        return view;
+    }
+
+    private void loadSpinnerItems(){
         List<String> list;
         list = new ArrayList<>();
         list.add("-");
         for(String category : categories){
             list.add(category);
         }
-        adapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner, list);
-        adapter.setDropDownViewResource(R.layout.spinner_item);
-        productCategorySpinner.setAdapter(adapter);
-        productCategorySpinner.setSelection(0);
-
-        layout.addView(view);
-        return view;
+        categoriesAdapter = new ArrayAdapter<>(getApplicationContext(), R.layout.spinner, list);
+        categoriesAdapter.setDropDownViewResource(R.layout.spinner_item);
     }
 
     private View.OnClickListener removeProduct(final View view, final LinearLayout layout){
@@ -260,7 +264,6 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     }
 
     private void editCategories(){
-
         categoriesDialog.show();
     }
 
@@ -339,9 +342,16 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     }
 
     @Override
+    protected  void onPause(){
+        super.onPause();
+        categoriesDialog.dismiss();
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         EventBus.getDefault().register(this);
+        categoriesDialog.onStart();
         loadBackdrop();
     }
 
@@ -349,6 +359,7 @@ public class BillAcceptanceActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         EventBus.getDefault().unregister(this);
+        categoriesDialog.onStop();
     }
 
     @Override

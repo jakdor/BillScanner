@@ -8,7 +8,7 @@ import com.asi.billscanner.dbUtilities.BillsModel;
 
 import java.util.Vector;
 
-class BillsAdapter {
+public class BillsAdapter {
 
     private static final String CLASS_TAG = "BillsAdapter";
     private DbHandler dbHandler;
@@ -221,7 +221,7 @@ class BillsAdapter {
     /**
      * gets all categories from db
      */
-    Vector<String> getUsedCategories(){
+    public Vector<String> getUsedCategories(){
         Vector<String> categories = new Vector<>();
 
         Cursor categoriesCursor = dbHandler.getUsedCategories();
@@ -277,7 +277,7 @@ class BillsAdapter {
     /**
      * gets all categories discarded by user
      */
-    Vector<String> getDiscardedCategories(){
+    public Vector<String> getDiscardedCategories(){
         Vector<String> categories = new Vector<>();
 
         Cursor categoriesCursor = dbHandler.getDiscardedCategories();
@@ -298,7 +298,7 @@ class BillsAdapter {
     /**
      * delete discarded category by name
      */
-    void deleteDiscardedCategory(String category){
+    public void deleteDiscardedCategory(String category){
         if(!dbHandler.deleteDiscardedCategory(category)){
             Log.wtf(CLASS_TAG, "failed to delete discarded category from db");
             throw new RuntimeException(CLASS_TAG + ": failed to delete discarded category from db");
@@ -308,7 +308,7 @@ class BillsAdapter {
     /**
      * add discarded category to db
      */
-    void addDiscardedCategory(String category) {
+    public void addDiscardedCategory(String category) {
         if(dbHandler.insertDiscardedCategory(category) == -1){
             Log.wtf(CLASS_TAG, "failed to insert discarded category into db");
             throw new RuntimeException(CLASS_TAG + ": failed to insert discarded category into db");

@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.asi.billscanner.ui.elements.CategoriesDialog;
+
 import org.greenrobot.eventbus.EventBus;
 
 import java.util.Vector;
@@ -85,7 +87,20 @@ class BillFactory {
     }
 
     private void lunchBillAcceptanceActivity(){
+        EventBus.getDefault().postSticky(
+                new CategoriesDialog.GetBillsAdapter(billsAdapter));
+
         Intent billAcceptanceIntent = new Intent(appContext, BillAcceptanceActivity.class);
         appContext.startActivity(billAcceptanceIntent);
+
+        //spawnDummyTestBill();
+    }
+
+    private void spawnDummyTestBill(){
+        Bill bill = new Bill("2017-06-30", "ZZ TOP S.C.", "K.Wielkiego 25/1A");
+        bill.addNewProduct("ABBA", "Kanapka", 1.0, 10.5);
+        bill.addNewProduct("Pudelko", "inne", 1.0, 0.5);
+        bill.addNewProduct("zupa kremowa", "Zupa", 1.5, 6.5);
+        billsAdapter.addBillToDB(bill);
     }
 }
